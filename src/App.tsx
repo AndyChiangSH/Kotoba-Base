@@ -9,12 +9,10 @@ import {
   LoaderCircle,
   Mic,
   Moon,
-  Play,
   Search,
   Settings,
   Sparkles,
   Sun,
-  Volume2,
   X,
 } from 'lucide-react'
 
@@ -24,8 +22,9 @@ type Word = {
   reading: string
   meaning: string
   level: string
-  example: { japanese: string; reading: string; translation: string }
-  collocations: string[]
+  partOfSpeech: string
+  examples: { japanese: string; reading: string; translation: string }[]
+  collocations: { word: string; reading: string; meaning: string }[]
   related: { word: string; reading: string; note: string }[]
 }
 
@@ -34,27 +33,31 @@ type SettingsState = { apiKey: string; model: string; theme: 'light' | 'dark' }
 const starterWords: Word[] = [
   {
     id: 'taberu', japanese: '食べる', reading: 'たべる', meaning: '吃；食用', level: 'N5',
-    example: { japanese: '毎朝、パンを食べます。', reading: 'まいあさ、パンをたべます。', translation: '每天早上吃麵包。' },
-    collocations: ['ご飯を食べる', '一緒に食べる', 'たくさん食べる'],
-    related: [{ word: '食事', reading: 'しょくじ', note: '用餐、飲食（名詞）' }, { word: '飲む', reading: 'のむ', note: '喝；服用（動詞）' }],
+    partOfSpeech: '動詞・一段動詞',
+    examples: [{ japanese: '毎朝、パンを食べます。', reading: 'まいあさ、パンをたべます。', translation: '每天早上吃麵包。' }, { japanese: '一緒に昼ご飯を食べませんか。', reading: 'いっしょにひるごはんをたべませんか。', translation: '要不要一起吃午餐？' }, { japanese: '野菜をたくさん食べてください。', reading: 'やさいをたくさんたべてください。', translation: '請多吃蔬菜。' }],
+    collocations: [{ word: 'ご飯を食べる', reading: 'ごはんをたべる', meaning: '吃飯' }, { word: '一緒に食べる', reading: 'いっしょにたべる', meaning: '一起吃' }, { word: 'たくさん食べる', reading: 'たくさんたべる', meaning: '吃很多' }],
+    related: [{ word: '食事', reading: 'しょくじ', note: '用餐、飲食（名詞）' }, { word: '飲む', reading: 'のむ', note: '喝；服用（動詞）' }, { word: '料理', reading: 'りょうり', note: '料理；菜餚（名詞）' }],
   },
   {
     id: 'yoyaku', japanese: '予約', reading: 'よやく', meaning: '預約；預訂', level: 'N4',
-    example: { japanese: 'ホテルを予約しました。', reading: 'ホテルをよやくしました。', translation: '我預訂了飯店。' },
-    collocations: ['予約をする', '予約を変更する', '事前予約'],
-    related: [{ word: '予定', reading: 'よてい', note: '預定；計畫（名詞）' }, { word: '約束', reading: 'やくそく', note: '約定；承諾（名詞）' }],
+    partOfSpeech: '名詞・サ變動詞',
+    examples: [{ japanese: 'ホテルを予約しました。', reading: 'ホテルをよやくしました。', translation: '我預訂了飯店。' }, { japanese: 'レストランの予約をお願いします。', reading: 'レストランのよやくをおねがいします。', translation: '麻煩幫我預約餐廳。' }, { japanese: '予約を変更したいです。', reading: 'よやくをへんこうしたいです。', translation: '我想更改預約。' }],
+    collocations: [{ word: '予約をする', reading: 'よやくをする', meaning: '進行預約' }, { word: '予約を変更する', reading: 'よやくをへんこうする', meaning: '更改預約' }, { word: '事前予約', reading: 'じぜんよやく', meaning: '事前預約' }],
+    related: [{ word: '予定', reading: 'よてい', note: '預定；計畫（名詞）' }, { word: '約束', reading: 'やくそく', note: '約定；承諾（名詞）' }, { word: '申込み', reading: 'もうしこみ', note: '申請；報名（名詞）' }],
   },
   {
     id: 'kirei', japanese: '綺麗', reading: 'きれい', meaning: '漂亮；乾淨', level: 'N5',
-    example: { japanese: 'この花はとても綺麗ですね。', reading: 'このはなはとてもきれいですね。', translation: '這朵花真漂亮呢。' },
-    collocations: ['綺麗な景色', '綺麗にする', 'とても綺麗'],
-    related: [{ word: '美しい', reading: 'うつくしい', note: '美麗；優美（い形容詞）' }, { word: '清潔', reading: 'せいけつ', note: '清潔；衛生（な形容詞）' }],
+    partOfSpeech: 'な形容詞',
+    examples: [{ japanese: 'この花はとても綺麗ですね。', reading: 'このはなはとてもきれいですね。', translation: '這朵花真漂亮呢。' }, { japanese: '部屋を綺麗に掃除しました。', reading: 'へやをきれいにそうじしました。', translation: '把房間打掃得很乾淨。' }, { japanese: '綺麗な海を見たいです。', reading: 'きれいなうみをみたいです。', translation: '我想看美麗的海。' }],
+    collocations: [{ word: '綺麗な景色', reading: 'きれいなけしき', meaning: '漂亮的景色' }, { word: '綺麗にする', reading: 'きれいにする', meaning: '弄乾淨' }, { word: 'とても綺麗', reading: 'とてもきれい', meaning: '非常漂亮' }],
+    related: [{ word: '美しい', reading: 'うつくしい', note: '美麗；優美（い形容詞）' }, { word: '清潔', reading: 'せいけつ', note: '清潔；衛生（な形容詞）' }, { word: '汚い', reading: 'きたない', note: '骯髒；不乾淨（い形容詞）' }],
   },
   {
     id: 'benkyou', japanese: '勉強', reading: 'べんきょう', meaning: '學習；用功', level: 'N5',
-    example: { japanese: '日本語を勉強しています。', reading: 'にほんごをべんきょうしています。', translation: '我正在學習日文。' },
-    collocations: ['日本語を勉強する', '勉強になる', '勉強を始める'],
-    related: [{ word: '学ぶ', reading: 'まなぶ', note: '學習；習得（動詞）' }, { word: '練習', reading: 'れんしゅう', note: '練習；訓練（名詞）' }],
+    partOfSpeech: '名詞・サ變動詞',
+    examples: [{ japanese: '日本語を勉強しています。', reading: 'にほんごをべんきょうしています。', translation: '我正在學習日文。' }, { japanese: '毎日二時間勉強します。', reading: 'まいにちにじかんべんきょうします。', translation: '每天學習兩個小時。' }, { japanese: '試験のために勉強を始めました。', reading: 'しけんのためにべんきょうをはじめました。', translation: '為了考試開始學習。' }],
+    collocations: [{ word: '日本語を勉強する', reading: 'にほんごをべんきょうする', meaning: '學習日文' }, { word: '勉強になる', reading: 'べんきょうになる', meaning: '學到很多' }, { word: '勉強を始める', reading: 'べんきょうをはじめる', meaning: '開始學習' }],
+    related: [{ word: '学ぶ', reading: 'まなぶ', note: '學習；習得（動詞）' }, { word: '練習', reading: 'れんしゅう', note: '練習；訓練（名詞）' }, { word: '研究', reading: 'けんきゅう', note: '研究；鑽研（名詞）' }],
   },
 ]
 
@@ -68,34 +71,40 @@ const modelIds: Record<string, string> = {
 }
 
 function RubyText({ text, reading }: { text: string; reading: string }) {
+  if (!/[一-龯々]/.test(text)) return <>{text}</>
   return <ruby>{text}<rt>{reading}</rt></ruby>
 }
 
 function App() {
-  const [words, setWords] = useState<Word[]>(() => JSON.parse(localStorage.getItem('kotoba-words') || 'null') || starterWords)
+  const [words, setWords] = useState<Word[]>(() => {
+    const stored = JSON.parse(localStorage.getItem('kotoba-words') || 'null')
+    return Array.isArray(stored) && stored.every((word) => Array.isArray(word.examples) && word.partOfSpeech) ? stored : starterWords
+  })
   const [settings, setSettings] = useState<SettingsState>(() => JSON.parse(localStorage.getItem('kotoba-settings') || 'null') || { apiKey: '', model: models[2], theme: 'light' })
   const [query, setQuery] = useState('')
   const [selected, setSelected] = useState<Word | null>(starterWords[0])
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [isSearching, setIsSearching] = useState(false)
   const [notice, setNotice] = useState('')
+  const [isNoticeLeaving, setIsNoticeLeaving] = useState(false)
   const [isListening, setIsListening] = useState(false)
 
   useEffect(() => { localStorage.setItem('kotoba-words', JSON.stringify(words)) }, [words])
   useEffect(() => { localStorage.setItem('kotoba-settings', JSON.stringify(settings)); document.documentElement.dataset.theme = settings.theme }, [settings])
+  useEffect(() => {
+    if (!notice) return
+    setIsNoticeLeaving(false)
+    const fadeTimer = window.setTimeout(() => setIsNoticeLeaving(true), 3000)
+    const removeTimer = window.setTimeout(() => setNotice(''), 3400)
+    return () => { window.clearTimeout(fadeTimer); window.clearTimeout(removeTimer) }
+  }, [notice])
 
   const filteredWords = useMemo(() => {
     const normalized = query.trim().toLowerCase()
     if (!normalized) return words
     return words.filter((word) => `${word.japanese}${word.reading}${word.meaning}`.toLowerCase().includes(normalized))
   }, [query, words])
-
-  const speak = (text: string) => {
-    window.speechSynthesis.cancel()
-    const utterance = new SpeechSynthesisUtterance(text)
-    utterance.lang = 'zh-TW'
-    window.speechSynthesis.speak(utterance)
-  }
+  const visibleWords = filteredWords.slice(0, 10)
 
   const listen = () => {
     const SpeechRecognition = window.webkitSpeechRecognition
@@ -116,7 +125,7 @@ function App() {
     if (localWord) { setSelected(localWord); setNotice('已從你的單字庫找到'); return }
     if (!settings.apiKey) { setNotice('找不到單字。請先在設定中填入 Gemini API Key。'); setIsSettingsOpen(true); return }
     setIsSearching(true); setNotice('正在向 Gemini 詢問單字資料…')
-    const prompt = `你是日文老師。請針對「${cleanQuery}」回傳 JSON，不要 markdown。所有日文漢字的 reading 請用平假名，中文說明簡潔。格式：{"japanese":"","reading":"","meaning":"","level":"N5","example":{"japanese":"","reading":"","translation":""},"collocations":[""],"related":[{"word":"","reading":"","note":""}]}`
+    const prompt = `你是日文老師。請針對「${cleanQuery}」回傳 JSON，不要 markdown。請用 Gemini 判斷 JLPT 難度，只能是 N5、N4、N3、N2、N1。只有日文漢字需要 reading，假名與中文不需重複標注。請至少提供 3 句不同例句、3 個搭配詞（每個附中文意思）、3 個同義詞/反義詞/相似詞。格式：{"japanese":"","reading":"","meaning":"","level":"N5","partOfSpeech":"","examples":[{"japanese":"","reading":"","translation":""},{"japanese":"","reading":"","translation":""},{"japanese":"","reading":"","translation":""}],"collocations":[{"word":"","reading":"","meaning":""},{"word":"","reading":"","meaning":""},{"word":"","reading":"","meaning":""}],"related":[{"word":"","reading":"","note":""},{"word":"","reading":"","note":""},{"word":"","reading":"","note":""}]}`
     try {
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelIds[settings.model]}:generateContent?key=${settings.apiKey}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] },), })
       if (!response.ok) throw new Error('API request failed')
@@ -132,40 +141,37 @@ function App() {
 
   const saveWord = () => {
     if (!selected) return
-    if (words.some((word) => word.japanese === selected.japanese && word.reading === selected.reading)) { setNotice('這個單字已經在單字庫裡了'); return }
-    setWords((current) => [selected, ...current]); setNotice('已儲存到你的單字庫')
+    const savedWord = words.some((word) => word.japanese === selected.japanese && word.reading === selected.reading)
+    if (savedWord) {
+      setWords((current) => current.filter((word) => word.id !== selected.id))
+      setNotice('已取消儲存單字')
+      return
+    }
+    setWords((current) => [selected, ...current]); setNotice('已儲存單字')
   }
 
   return (
     <div className="app-shell">
-      <nav className="topbar">
-        <div className="brand"><span className="brand-mark"><BookOpen size={18} /></span><span>日文單字庫</span><span className="version-badge">v0.0</span></div>
-        <button className="icon-button" aria-label="開啟設定" onClick={() => setIsSettingsOpen(true)}><Settings size={19} /><span>設定</span></button>
-      </nav>
-
       <main className="workspace">
-        <header className="intro">
-          <div><p className="eyebrow">YOUR PERSONAL WORD BANK</p><h1>把每一次遇見，<em>留下來。</em></h1><p className="intro-copy">搜尋、理解、收藏日文單字。你的語言學習，從一個詞開始累積。</p></div>
-          <div className="word-count"><strong>{words.length.toString().padStart(2, '0')}</strong><span>個單字<br />已收藏</span></div>
-        </header>
+        <div className="page-tools"><div className="brand"><span className="brand-mark"><BookOpen size={18} /></span><span>日文單字庫</span><span className="version-badge">v0.1</span></div><button className="icon-button" aria-label="開啟設定" onClick={() => setIsSettingsOpen(true)}><Settings size={19} /><span>設定</span></button></div>
 
         <section className="search-panel">
-          <div className="search-row"><div className="search-input-wrap"><Search size={20} /><input value={query} onChange={(event) => setQuery(event.target.value)} onKeyDown={(event) => event.key === 'Enter' && translate()} placeholder="輸入日文單字或中文意思…" /><button className={`mic-button ${isListening ? 'listening' : ''}`} aria-label="日語語音輸入" onClick={listen}><Mic size={19} /></button></div><button className="translate-button" onClick={translate} disabled={isSearching}>{isSearching ? <LoaderCircle className="spin" size={18} /> : <Sparkles size={18} />}翻譯</button></div>
+          <div className="search-row"><div className="search-input-wrap"><Search size={20} /><input value={query} onChange={(event) => setQuery(event.target.value)} onKeyDown={(event) => event.key === 'Enter' && translate()} placeholder="輸入日文單字或中文意思…" />{query && <button className="clear-button" aria-label="清空文字框" onClick={() => setQuery('')}><X size={17} /></button>}<button className={`mic-button ${isListening ? 'listening' : ''}`} aria-label="日語語音輸入" onClick={listen}><Mic size={19} /></button></div><button className="translate-button" onClick={translate} disabled={isSearching}>{isSearching ? <LoaderCircle className="spin" size={18} /> : <Sparkles size={18} />}翻譯</button></div>
           <div className="search-hint"><span><CircleHelp size={14} /> 可以輸入「食べる」或「吃」</span><span>支援日語語音輸入</span></div>
         </section>
 
-        {notice && <div className="notice"><span>{notice}</span><button onClick={() => setNotice('')} aria-label="關閉提示"><X size={15} /></button></div>}
+        {notice && <div className={`notice ${isNoticeLeaving ? 'leaving' : ''}`}><span>{notice}</span><button onClick={() => setNotice('')} aria-label="關閉提示"><X size={15} /></button></div>}
 
         <div className="content-grid">
-          <section className="library-section"><div className="section-heading"><div><p className="eyebrow">MY COLLECTION</p><h2>我的單字庫</h2></div><span className="result-count">{filteredWords.length} 個單字</span></div><div className="word-list">{filteredWords.map((word) => <button key={word.id} className={`word-row ${selected?.id === word.id ? 'active' : ''}`} onClick={() => setSelected(word)}><span className="word-japanese"><RubyText text={word.japanese} reading={word.reading} /></span><span className="word-meaning">{word.meaning}</span><span className="level">{word.level}</span><ChevronDown className="row-arrow" size={16} /></button>)}{filteredWords.length === 0 && <div className="empty-state"><Search size={24} /><p>單字庫裡還沒有這個詞</p><span>按下翻譯，讓 Gemini 幫你查詢</span></div>}</div></section>
+          <section className="library-section"><div className="section-heading"><div><h2>我的單字庫</h2></div><span className="result-count">{Math.min(filteredWords.length, 10)} / 10 個單字</span></div><div className="word-list">{visibleWords.map((word) => <button key={word.id} className={`word-row ${selected?.id === word.id ? 'active' : ''}`} onClick={() => setSelected(word)}><span className="word-japanese"><RubyText text={word.japanese} reading={word.reading} /></span><span className="word-meaning">{word.meaning}</span><span className="level">{word.level}</span><ChevronDown className="row-arrow" size={16} /></button>)}{filteredWords.length === 0 && <div className="empty-state"><Search size={24} /><p>單字庫裡還沒有這個詞</p><span>按下翻譯，讓 Gemini 幫你查詢</span></div>}</div></section>
 
-          {selected && <section className="detail-section"><div className="detail-topline"><span className="eyebrow">WORD DETAIL</span><button className="save-button" onClick={saveWord}><Bookmark size={17} />儲存單字</button></div><div className="detail-title"><div><h2><RubyText text={selected.japanese} reading={selected.reading} /></h2><p>{selected.meaning}</p></div><span className="large-level">{selected.level}</span></div><div className="detail-block example-block"><div className="block-label"><span>例句</span><button className="audio-button" onClick={() => speak(selected.example.translation)} title="播放中文翻譯"><Volume2 size={16} /></button></div><p className="example-japanese"><RubyText text={selected.example.japanese} reading={selected.example.reading} /></p><p className="example-translation">{selected.example.translation}</p></div><div className="detail-block"><div className="block-label"><span>常見搭配詞</span></div><div className="chips">{selected.collocations.map((item) => <span key={item}>{item}</span>)}</div></div><div className="detail-block"><div className="block-label"><span>相關詞比較</span></div><div className="related-list">{selected.related.map((item) => <div className="related-item" key={item.word}><strong><RubyText text={item.word} reading={item.reading} /></strong><span>{item.note}</span></div>)}</div></div><div className="listen-bar"><div><Volume2 size={18} /><span>中文語音輸出</span></div><button onClick={() => speak(selected.example.translation)}><Play size={14} fill="currentColor" />播放翻譯</button></div></section>}
+          {selected && <section className="detail-section"><div className="detail-topline"><span>單字詳細資料</span><button className={`save-button ${words.some((word) => word.id === selected.id) ? 'saved' : ''}`} onClick={saveWord}><Bookmark size={17} fill={words.some((word) => word.id === selected.id) ? 'currentColor' : 'none'} />{words.some((word) => word.id === selected.id) ? '已儲存單字' : '儲存單字'}</button></div><div className="detail-title"><div><h2><RubyText text={selected.japanese} reading={selected.reading} /></h2><p>{selected.meaning}</p><span className="part-of-speech">{selected.partOfSpeech}</span></div><span className="large-level">{selected.level}</span></div><div className="detail-block example-block"><div className="block-label"><span>例句</span></div>{selected.examples.map((example, index) => <div className="example-item" key={`${example.japanese}-${index}`}><p className="example-japanese"><RubyText text={example.japanese} reading={example.reading} /></p><p className="example-translation">{example.translation}</p></div>)}</div><div className="detail-block"><div className="block-label"><span>常見搭配詞</span></div><div className="related-list">{selected.collocations.map((item) => <div className="related-item" key={item.word}><strong><RubyText text={item.word} reading={item.reading} /></strong><span>{item.meaning}</span></div>)}</div></div><div className="detail-block"><div className="block-label"><span>相關詞比較</span></div><div className="related-list">{selected.related.map((item) => <div className="related-item" key={item.word}><strong><RubyText text={item.word} reading={item.reading} /></strong><span>{item.note}</span></div>)}</div></div></section>}
         </div>
       </main>
 
       <footer><span>2026/09/08&nbsp; | &nbsp;Copyright © 2026 Andy Chiang</span><a href="https://github.com/AndyChiangSH/Kotoba-Base" target="_blank" rel="noreferrer">GitHub <ExternalLink size={13} /></a></footer>
 
-      {isSettingsOpen && <div className="modal-backdrop" onMouseDown={(event) => event.target === event.currentTarget && setIsSettingsOpen(false)}><section className="settings-modal" role="dialog" aria-modal="true"><div className="modal-header"><div><p className="eyebrow">PREFERENCES</p><h2>設定</h2></div><button className="close-button" onClick={() => setIsSettingsOpen(false)} aria-label="關閉設定"><X size={19} /></button></div><label className="field-label">Gemini API Key<a href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer">Google AI Studio <ExternalLink size={13} /></a></label><input className="text-field" type="password" value={settings.apiKey} onChange={(event) => setSettings({ ...settings, apiKey: event.target.value })} placeholder="貼上你的 API Key" /><p className="field-help">API Key 只會儲存在這個瀏覽器，不會上傳到 Kotoba Base。</p><label className="field-label">Gemini 模型</label><select className="text-field" value={settings.model} onChange={(event) => setSettings({ ...settings, model: event.target.value })}>{models.map((model) => <option key={model}>{model}</option>)}</select><label className="field-label">介面主題</label><div className="theme-options"><button className={settings.theme === 'light' ? 'selected' : ''} onClick={() => setSettings({ ...settings, theme: 'light' })}><Sun size={17} />淺色{settings.theme === 'light' && <Check size={15} />}</button><button className={settings.theme === 'dark' ? 'selected' : ''} onClick={() => setSettings({ ...settings, theme: 'dark' })}><Moon size={17} />深色{settings.theme === 'dark' && <Check size={15} />}</button></div><button className="done-button" onClick={() => setIsSettingsOpen(false)}>完成</button></section></div>}
+      {isSettingsOpen && <div className="modal-backdrop" onMouseDown={(event) => event.target === event.currentTarget && setIsSettingsOpen(false)}><section className="settings-modal" role="dialog" aria-modal="true"><div className="modal-header"><div><h2>設定</h2></div><button className="close-button" onClick={() => setIsSettingsOpen(false)} aria-label="關閉設定"><X size={19} /></button></div><label className="field-label">Gemini API Key<a href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer">Google AI Studio <ExternalLink size={13} /></a></label><input className="text-field" type="password" value={settings.apiKey} onChange={(event) => setSettings({ ...settings, apiKey: event.target.value })} placeholder="貼上你的 API Key" /><p className="field-help">API Key 只會儲存在這個瀏覽器，不會上傳到 Kotoba Base。</p><label className="field-label">Gemini 模型</label><select className="text-field" value={settings.model} onChange={(event) => setSettings({ ...settings, model: event.target.value })}>{models.map((model) => <option key={model}>{model}</option>)}</select><label className="field-label">介面主題</label><div className="theme-options"><button className={settings.theme === 'light' ? 'selected' : ''} onClick={() => setSettings({ ...settings, theme: 'light' })}><Sun size={17} />淺色{settings.theme === 'light' && <Check size={15} />}</button><button className={settings.theme === 'dark' ? 'selected' : ''} onClick={() => setSettings({ ...settings, theme: 'dark' })}><Moon size={17} />深色{settings.theme === 'dark' && <Check size={15} />}</button></div><button className="done-button" onClick={() => setIsSettingsOpen(false)}>完成</button></section></div>}
     </div>
   )
 }
