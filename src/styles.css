@@ -40,3 +40,15 @@ footer { border-top: 1px solid var(--line); display: flex; justify-content: spac
 .save-button.saved { color: var(--green); border-color: var(--green); }
 @keyframes toast-in { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translate(-50%, 0); } }
 @keyframes toast-out { from { opacity: 1; transform: translate(-50%, 0); } to { opacity: 0; transform: translate(-50%, 10px); } }
+.page-tools { margin-bottom: 52px; }
+.paste-button { border: 0; background: transparent; color: var(--muted); display: inline-flex; align-items: center; gap: 5px; padding: 6px 8px; border-radius: 5px; font-size: 12px; white-space: nowrap; }
+.paste-button:hover { color: var(--green); background: var(--mint); }
+.section-heading, .detail-topline { align-items: center; }
+.result-count { padding-top: 0; }
+.word-list { max-height: calc(76px * 10 + 1px); overflow-y: auto; }
+.row-audio { color: var(--muted); cursor: pointer; }
+.row-audio:hover { color: var(--green); }
+.word-title-line { display: flex; align-items: center; gap: 8px; }
+.word-title-line h2 { margin-bottom: 0; }
+.word-title-line .audio-button { color: var(--muted); }
+.word-title-line .audio-button:hover { color: var(--green); }

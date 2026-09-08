@@ -3,7 +3,7 @@ import {
   BookOpen,
   Bookmark,
   Check,
-  ChevronDown,
+  ClipboardPaste,
   CircleHelp,
   ExternalLink,
   LoaderCircle,
@@ -13,6 +13,7 @@ import {
   Settings,
   Sparkles,
   Sun,
+  Volume2,
   X,
 } from 'lucide-react'
 
@@ -104,7 +105,21 @@ function App() {
     if (!normalized) return words
     return words.filter((word) => `${word.japanese}${word.reading}${word.meaning}`.toLowerCase().includes(normalized))
   }, [query, words])
-  const visibleWords = filteredWords.slice(0, 10)
+
+  const pasteQuery = async () => {
+    try {
+      setQuery(await navigator.clipboard.readText())
+    } catch {
+      setNotice('無法讀取剪貼簿，請確認瀏覽器已允許貼上。')
+    }
+  }
+
+  const speakJapanese = (text: string) => {
+    window.speechSynthesis.cancel()
+    const utterance = new SpeechSynthesisUtterance(text)
+    utterance.lang = 'ja-JP'
+    window.speechSynthesis.speak(utterance)
+  }
 
   const listen = () => {
     const SpeechRecognition = window.webkitSpeechRecognition
@@ -153,19 +168,19 @@ function App() {
   return (
     <div className="app-shell">
       <main className="workspace">
-        <div className="page-tools"><div className="brand"><span className="brand-mark"><BookOpen size={18} /></span><span>日文單字庫</span><span className="version-badge">v0.1</span></div><button className="icon-button" aria-label="開啟設定" onClick={() => setIsSettingsOpen(true)}><Settings size={19} /><span>設定</span></button></div>
+        <div className="page-tools"><div className="brand"><span className="brand-mark"><BookOpen size={18} /></span><span>日文單字庫</span><span className="version-badge">v0.2</span></div><button className="icon-button" aria-label="開啟設定" onClick={() => setIsSettingsOpen(true)}><Settings size={19} /><span>設定</span></button></div>
 
         <section className="search-panel">
-          <div className="search-row"><div className="search-input-wrap"><Search size={20} /><input value={query} onChange={(event) => setQuery(event.target.value)} onKeyDown={(event) => event.key === 'Enter' && translate()} placeholder="輸入日文單字或中文意思…" />{query && <button className="clear-button" aria-label="清空文字框" onClick={() => setQuery('')}><X size={17} /></button>}<button className={`mic-button ${isListening ? 'listening' : ''}`} aria-label="日語語音輸入" onClick={listen}><Mic size={19} /></button></div><button className="translate-button" onClick={translate} disabled={isSearching}>{isSearching ? <LoaderCircle className="spin" size={18} /> : <Sparkles size={18} />}翻譯</button></div>
+          <div className="search-row"><div className="search-input-wrap"><Search size={20} /><input value={query} onChange={(event) => setQuery(event.target.value)} onKeyDown={(event) => event.key === 'Enter' && translate()} placeholder="輸入日文單字或中文意思…" />{query ? <button className="clear-button" aria-label="清空文字框" onClick={() => setQuery('')}><X size={17} /></button> : <button className="paste-button" aria-label="貼上剪貼簿內容" onClick={pasteQuery}><ClipboardPaste size={17} /><span>貼上</span></button>}<button className={`mic-button ${isListening ? 'listening' : ''}`} aria-label="日語語音輸入" onClick={listen}><Mic size={19} /></button></div><button className="translate-button" onClick={translate} disabled={isSearching}>{isSearching ? <LoaderCircle className="spin" size={18} /> : <Sparkles size={18} />}翻譯</button></div>
           <div className="search-hint"><span><CircleHelp size={14} /> 可以輸入「食べる」或「吃」</span><span>支援日語語音輸入</span></div>
         </section>
 
         {notice && <div className={`notice ${isNoticeLeaving ? 'leaving' : ''}`}><span>{notice}</span><button onClick={() => setNotice('')} aria-label="關閉提示"><X size={15} /></button></div>}
 
         <div className="content-grid">
-          <section className="library-section"><div className="section-heading"><div><h2>我的單字庫</h2></div><span className="result-count">{Math.min(filteredWords.length, 10)} / 10 個單字</span></div><div className="word-list">{visibleWords.map((word) => <button key={word.id} className={`word-row ${selected?.id === word.id ? 'active' : ''}`} onClick={() => setSelected(word)}><span className="word-japanese"><RubyText text={word.japanese} reading={word.reading} /></span><span className="word-meaning">{word.meaning}</span><span className="level">{word.level}</span><ChevronDown className="row-arrow" size={16} /></button>)}{filteredWords.length === 0 && <div className="empty-state"><Search size={24} /><p>單字庫裡還沒有這個詞</p><span>按下翻譯，讓 Gemini 幫你查詢</span></div>}</div></section>
+          <section className="library-section"><div className="section-heading"><div><h2>我的單字庫</h2></div><span className="result-count">{filteredWords.length} 個單字</span></div><div className="word-list">{filteredWords.map((word) => <button key={word.id} className={`word-row ${selected?.id === word.id ? 'active' : ''}`} onClick={() => setSelected(word)}><span className="word-japanese"><RubyText text={word.japanese} reading={word.reading} /></span><span className="word-meaning">{word.meaning}</span><span className="level">{word.level}</span><Volume2 className="row-audio" size={16} onClick={(event) => { event.stopPropagation(); speakJapanese(word.japanese) }} /></button>)}{filteredWords.length === 0 && <div className="empty-state"><Search size={24} /><p>單字庫裡還沒有這個詞</p><span>按下翻譯，讓 Gemini 幫你查詢</span></div>}</div></section>
 
-          {selected && <section className="detail-section"><div className="detail-topline"><span>單字詳細資料</span><button className={`save-button ${words.some((word) => word.id === selected.id) ? 'saved' : ''}`} onClick={saveWord}><Bookmark size={17} fill={words.some((word) => word.id === selected.id) ? 'currentColor' : 'none'} />{words.some((word) => word.id === selected.id) ? '已儲存單字' : '儲存單字'}</button></div><div className="detail-title"><div><h2><RubyText text={selected.japanese} reading={selected.reading} /></h2><p>{selected.meaning}</p><span className="part-of-speech">{selected.partOfSpeech}</span></div><span className="large-level">{selected.level}</span></div><div className="detail-block example-block"><div className="block-label"><span>例句</span></div>{selected.examples.map((example, index) => <div className="example-item" key={`${example.japanese}-${index}`}><p className="example-japanese"><RubyText text={example.japanese} reading={example.reading} /></p><p className="example-translation">{example.translation}</p></div>)}</div><div className="detail-block"><div className="block-label"><span>常見搭配詞</span></div><div className="related-list">{selected.collocations.map((item) => <div className="related-item" key={item.word}><strong><RubyText text={item.word} reading={item.reading} /></strong><span>{item.meaning}</span></div>)}</div></div><div className="detail-block"><div className="block-label"><span>相關詞比較</span></div><div className="related-list">{selected.related.map((item) => <div className="related-item" key={item.word}><strong><RubyText text={item.word} reading={item.reading} /></strong><span>{item.note}</span></div>)}</div></div></section>}
+          {selected && <section className="detail-section"><div className="detail-topline"><span>單字卡</span><button className={`save-button ${words.some((word) => word.id === selected.id) ? 'saved' : ''}`} onClick={saveWord}><Bookmark size={17} fill={words.some((word) => word.id === selected.id) ? 'currentColor' : 'none'} />{words.some((word) => word.id === selected.id) ? '已儲存單字' : '儲存單字'}</button></div><div className="detail-title"><div><div className="word-title-line"><h2><RubyText text={selected.japanese} reading={selected.reading} /></h2><button className="audio-button" aria-label="播放日文單字" title="播放日文單字" onClick={() => speakJapanese(selected.japanese)}><Volume2 size={19} /></button></div><p>{selected.meaning}</p><span className="part-of-speech">{selected.partOfSpeech}</span></div><span className="large-level">{selected.level}</span></div><div className="detail-block example-block"><div className="block-label"><span>例句</span></div>{selected.examples.map((example, index) => <div className="example-item" key={`${example.japanese}-${index}`}><p className="example-japanese"><RubyText text={example.japanese} reading={example.reading} /></p><p className="example-translation">{example.translation}</p></div>)}</div><div className="detail-block"><div className="block-label"><span>常見搭配詞</span></div><div className="related-list">{selected.collocations.map((item) => <div className="related-item" key={item.word}><strong><RubyText text={item.word} reading={item.reading} /></strong><span>{item.meaning}</span></div>)}</div></div><div className="detail-block"><div className="block-label"><span>相關詞比較</span></div><div className="related-list">{selected.related.map((item) => <div className="related-item" key={item.word}><strong><RubyText text={item.word} reading={item.reading} /></strong><span>{item.note}</span></div>)}</div></div></section>}
         </div>
       </main>
 
