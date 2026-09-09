@@ -79,6 +79,46 @@ footer { border-top: 1px solid var(--line); display: flex; justify-content: spac
 .detail-title > .part-of-speech { grid-column: 2; grid-row: 2; justify-self: end; align-self: center; position: static; transform: none; margin: 0; }
 .detail-topline > span { font-size: 18px; font-weight: 700; }
 
+/* v0.8: the card owns the height; the library borrows it and scrolls inside. */
+.content-grid { align-items: start; }
+.detail-section { height: auto; min-height: 0; overflow: visible; }
+.library-section { height: var(--card-height, auto); min-height: 0; max-height: var(--card-height, none); overflow: hidden; }
+.library-section .word-list { min-height: 0; max-height: calc(var(--card-height, 760px) - 82px); overflow-y: auto; }
+.detail-title { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: auto auto; align-items: center; min-height: 113px; position: relative; }
+.detail-title > div:first-child { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: 1fr 1fr; align-items: center; width: 100%; padding-right: 110px; }
+.detail-title .word-title-line { grid-column: 1; grid-row: 1; align-self: center; }
+.detail-title > div:first-child > p { grid-column: 1; grid-row: 2; align-self: center; }
+.detail-title > div:first-child > .part-of-speech { grid-column: 2; grid-row: 2; align-self: center; margin: 0; text-align: right; }
+.detail-title > .large-level { position: absolute; top: 42px; right: 0; transform: translateY(-50%); }
+
+@media (max-width: 780px) {
+	.content-grid { display: flex; flex-direction: column; }
+	.detail-section { order: -1; }
+	.library-section { height: auto; max-height: none; }
+	.library-section .word-list { max-height: 760px; }
+}
+
+/* v0.9 layout: the card owns the natural height; the library scrolls within it. */
+.content-grid { align-items: start; }
+.detail-section { height: auto; min-height: 0; overflow: visible; }
+.library-section { height: var(--card-height, auto); max-height: var(--card-height, none); min-height: 0; overflow: hidden; }
+.library-section .word-list { min-height: 0; max-height: calc(var(--card-height, 760px) - 82px); overflow-y: auto; }
+.detail-title { display: flex; flex-direction: column; gap: 0; min-height: 113px; padding: 27px 0 24px; }
+.detail-japanese-group, .detail-meaning-group { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.detail-japanese-group { margin-bottom: 10px; }
+.detail-meaning-group p { margin: 0; }
+.detail-japanese-group .large-level, .detail-meaning-group .part-of-speech { position: static; transform: none; flex: 0 0 auto; }
+.detail-title > div:first-child { display: flex; width: 100%; padding: 0; }
+.detail-title h2 { font-size: 44px; font-weight: 700; }
+.detail-title .part-of-speech { margin: 0; }
+
+@media (max-width: 780px) {
+  .content-grid { display: flex; flex-direction: column; }
+  .detail-section { order: -1; }
+  .library-section { height: auto; max-height: none; }
+  .library-section .word-list { max-height: 760px; }
+}
+
 /* v0.7: let the card define the row height and scroll only the library. */
 .content-grid { align-items: stretch; }
 .detail-section { height: auto; min-height: 0; overflow: visible; }
