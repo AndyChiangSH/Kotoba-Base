@@ -42,7 +42,7 @@ footer { border-top: 1px solid var(--line); display: flex; justify-content: spac
 @keyframes toast-out { from { opacity: 1; transform: translate(-50%, 0); } to { opacity: 0; transform: translate(-50%, 10px); } }
 .page-tools { margin-bottom: 52px; }
 .paste-button { border: 0; background: none; color: var(--muted); display: grid; place-items: center; padding: 5px; border-radius: 50%; }
-.paste-button:hover { color: var(--green); background: var(--mint); }
+.paste-button:hover { color: var(--ink); background: var(--soft); }
 .section-heading, .detail-topline { align-items: center; }
 .result-count { padding-top: 0; }
 .word-list { max-height: calc(76px * 10 + 1px); overflow-y: auto; }
@@ -53,8 +53,8 @@ footer { border-top: 1px solid var(--line); display: flex; justify-content: spac
 .word-title-line .audio-button { color: var(--muted); }
 .word-title-line .audio-button:hover { color: var(--green); }
 .content-grid { align-items: stretch; }
-.library-section { min-height: 540px; display: flex; flex-direction: column; }
-.library-section .word-list { flex: 1; min-height: 0; max-height: none; }
+.library-section { min-height: 540px; min-width: 0; height: 100%; display: flex; flex-direction: column; overflow: hidden; }
+.library-section .word-list { flex: 1; min-height: 0; max-height: none; overflow-y: auto; }
 .word-row { grid-template-columns: 1.05fr 1fr 1.2fr 22px; }
 .row-arrow { display: block; }
 .word-part-of-speech { color: var(--muted); font-size: 12px; }
@@ -67,5 +67,6 @@ footer { border-top: 1px solid var(--line); display: flex; justify-content: spac
 .related-item { display: grid; grid-template-columns: minmax(120px, 1fr) minmax(0, 1.4fr); align-items: center; }
 .generated-time { color: var(--muted); font: 10px 'DM Mono', monospace; margin-top: 22px; text-align: right; }
 .detail-section::after { content: attr(data-generated-time); display: block; color: var(--muted); font: 10px 'DM Mono', monospace; margin-top: 22px; text-align: right; }
-.detail-title .large-level { top: 27px; }
-.detail-title .part-of-speech { top: 61px; }
+.detail-title .large-level { top: 42px; transform: translateY(-50%); }
+.detail-title .part-of-speech { top: 86px; transform: translateY(-50%); }
+.detail-topline > span { font-size: 18px; font-weight: 700; }

@@ -73,6 +73,14 @@ const modelIds: Record<string, string> = {
   'Gemini 3.5 Flash': 'gemini-3.5-flash-preview',
 }
 
+function getFirstVisitTime() {
+  const storedTime = localStorage.getItem('kotoba-first-visit')
+  if (storedTime) return storedTime
+  const firstVisitTime = new Date().toLocaleString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+  localStorage.setItem('kotoba-first-visit', firstVisitTime)
+  return firstVisitTime
+}
+
 function RubyText({ text, reading }: { text: string; reading: string }) {
   if (!/[一-龯々]/.test(text)) return <>{text}</>
   return <ruby>{text}<rt>{reading}</rt></ruby>
@@ -81,11 +89,19 @@ function RubyText({ text, reading }: { text: string; reading: string }) {
 function App() {
   const [words, setWords] = useState<Word[]>(() => {
     const stored = JSON.parse(localStorage.getItem('kotoba-words') || 'null')
-    return Array.isArray(stored) && stored.every((word) => Array.isArray(word.examples) && word.partOfSpeech) ? stored : starterWords
+    if (Array.isArray(stored) && stored.every((word) => Array.isArray(word.examples) && word.partOfSpeech)) {
+      const firstVisitTime = getFirstVisitTime()
+      return stored.map((word) => ({ ...word, generatedAt: word.generatedAt || firstVisitTime }))
+    }
+    const firstVisitTime = getFirstVisitTime()
+    return starterWords.slice(0, 3).map((word) => ({ ...word, generatedAt: firstVisitTime }))
   })
   const [settings, setSettings] = useState<SettingsState>(() => JSON.parse(localStorage.getItem('kotoba-settings') || 'null') || { apiKey: '', model: models[2], theme: 'light' })
   const [query, setQuery] = useState('')
-  const [selected, setSelected] = useState<Word | null>(starterWords[0])
+  const [selected, setSelected] = useState<Word | null>(() => {
+    const stored = JSON.parse(localStorage.getItem('kotoba-words') || 'null')
+    return Array.isArray(stored) && stored.length > 0 ? stored[0] : starterWords[0]
+  })
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [isSearching, setIsSearching] = useState(false)
   const [notice, setNotice] = useState('')
@@ -173,7 +189,7 @@ function App() {
   return (
     <div className="app-shell">
       <main className="workspace">
-        <div className="page-tools"><div className="brand"><span className="brand-mark"><BookOpen size={18} /></span><span>日文單字庫</span><span className="version-badge">v0.4</span></div><button className="icon-button" aria-label="開啟設定" onClick={() => setIsSettingsOpen(true)}><Settings size={19} /><span>設定</span></button></div>
+        <div className="page-tools"><div className="brand"><span className="brand-mark"><BookOpen size={18} /></span><span>日文單字庫</span><span className="version-badge">v0.5</span></div><button className="icon-button" aria-label="開啟設定" onClick={() => setIsSettingsOpen(true)}><Settings size={19} /><span>設定</span></button></div>
 
         <section className="search-panel">
           <div className="search-row"><div className="search-input-wrap"><Search size={20} /><input value={query} onChange={(event) => setQuery(event.target.value)} onKeyDown={(event) => event.key === 'Enter' && translate()} placeholder="輸入日文單字或中文意思…" />{query ? <button className="clear-button" aria-label="清空文字框" onClick={() => setQuery('')}><X size={17} /></button> : <button className="paste-button" aria-label="貼上剪貼簿內容" onClick={pasteQuery}><ClipboardPaste size={17} /></button>}<button className={`mic-button ${isListening ? 'listening' : ''}`} aria-label="日語語音輸入" onClick={listen}><Mic size={19} /></button></div><button className="translate-button" onClick={translate} disabled={isSearching}>{isSearching ? <LoaderCircle className="spin" size={18} /> : <Sparkles size={18} />}翻譯</button></div>
