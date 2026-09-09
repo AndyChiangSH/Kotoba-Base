@@ -40,7 +40,7 @@ button { cursor: pointer; }
 .page-tools { display: flex; align-items: center; justify-content: space-between; padding: 27px 0; margin-bottom: 25px; }
 .brand { display: flex; align-items: center; gap: 11px; font-weight: 700; letter-spacing: 0.01em; }
 .brand-mark { width: 32px; height: 32px; display: grid; place-items: center; background: var(--ink); color: var(--bg); border-radius: 8px; }
-.version-badge { padding: 4px 7px; border-radius: 5px; background: var(--mint); color: var(--green); font: 500 10px "DM Mono", monospace; }
+.version-badge { padding: 4px 7px; border-radius: 5px; background: var(--mint); color: var(--green); font: 700 10px "DM Mono", monospace; }
 .icon-button, .close-button, .audio-button, .mic-button { border: 0; background: none; display: inline-flex; align-items: center; gap: 8px; color: var(--muted); }
 .icon-button { font-size: 13px; padding: 10px 0; }
 .icon-button:hover, .audio-button:hover { color: var(--ink); }
@@ -148,8 +148,7 @@ footer a { color: var(--ink); text-decoration: none; display: flex; align-items:
   .icon-button span { display: none; }
   .search-panel { padding: 13px 14px 12px; }
   .search-input-wrap input { font-size: 14px; }
-  .translate-button { font-size: 0; width: 44px; justify-content: center; padding: 0; }
-  .random-button { font-size: 0; width: 44px; justify-content: center; padding: 0; }
+  .translate-button, .random-button { font-size: 0; width: 35px; height: 35px; justify-content: center; padding: 0; }
   .word-row { grid-template-columns: 1.1fr 1fr 1fr 35px; padding: 0 3px; }
   .word-meaning, .word-part-of-speech { font-size: 11px; }
   .word-title-line h2 { font-size: 33px; }

@@ -424,12 +424,19 @@ function App() {
   };
 
   const randomWord = async () => {
-    const prompt = `你是日文老師。請隨機選擇一個適合學習的日文單字，難度隨機設定為 N1、N2、N3、N4 或 N5，並回傳 JSON，不要 markdown。只有日文漢字需要 reading，假名與中文不需重複標注。請至少提供 3 句不同例句、3 個搭配詞（每個附中文意思）、3 個同義詞/反義詞/相似詞。格式：{"japanese":"","reading":"","meaning":"","level":"N5","partOfSpeech":"","examples":[{"japanese":"","reading":"","translation":""},{"japanese":"","reading":"","translation":""},{"japanese":"","reading":"","translation":""}],"collocations":[{"word":"","reading":"","meaning":""},{"word":"","reading":"","meaning":""},{"word":"","reading":"","meaning":""}],"related":[{"word":"","reading":"","note":""},{"word":"","reading":"","note":""},{"word":"","reading":"","note":""}]}`;
-    const result = await requestGeminiWord(prompt);
-    if (result) {
-      setSelected(result);
-      setNotice("隨機單字產生完成，可以儲存到單字庫");
+    const seenWords = new Set(words.map((word) => `${word.japanese}:${word.reading}`));
+    if (selected) seenWords.add(`${selected.japanese}:${selected.reading}`);
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      const nonce = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      const prompt = `你是日文老師。請隨機選擇一個適合學習的日文單字，難度隨機設定為 N1、N2、N3、N4 或 N5。這次請務必產生一個不在以下清單中的新單字：${Array.from(seenWords).join(", ") || "無"}。隨機識別碼：${nonce}。回傳 JSON，不要 markdown。只有日文漢字需要 reading，假名與中文不需重複標注。請至少提供 3 句不同例句、3 個搭配詞（每個附中文意思）、3 個同義詞/反義詞/相似詞。格式：{"japanese":"","reading":"","meaning":"","level":"N5","partOfSpeech":"","examples":[{"japanese":"","reading":"","translation":""},{"japanese":"","reading":"","translation":""},{"japanese":"","reading":"","translation":""}],"collocations":[{"word":"","reading":"","meaning":""},{"word":"","reading":"","meaning":""},{"word":"","reading":"","meaning":""}],"related":[{"word":"","reading":"","note":""},{"word":"","reading":"","note":""},{"word":"","reading":"","note":""}]}`;
+      const result = await requestGeminiWord(prompt);
+      if (result && !seenWords.has(`${result.japanese}:${result.reading}`)) {
+        setSelected(result);
+        setNotice("隨機單字產生完成，可以儲存到單字庫");
+        return;
+      }
     }
+    setNotice("暫時無法產生新的隨機單字，請再試一次。");
   };
 
   const saveWord = () => {
@@ -457,7 +464,7 @@ function App() {
               <BookOpen size={18} />
             </span>
             <span>日文單字庫</span>
-            <span className="version-badge">v0.12</span>
+            <span className="version-badge">v0.13</span>
           </div>
           <button
             className="icon-button"
@@ -505,6 +512,16 @@ function App() {
               </button>
             </div>
             <button
+              className="random-button"
+              onClick={randomWord}
+              disabled={isSearching}
+              aria-label="隨機產生單字"
+              title="隨機產生單字"
+            >
+              <Shuffle size={18} />
+              <span>隨機</span>
+            </button>
+            <button
               className="translate-button"
               onClick={translate}
               disabled={isSearching}
@@ -515,16 +532,6 @@ function App() {
                 <Sparkles size={18} />
               )}
               翻譯
-            </button>
-            <button
-              className="random-button"
-              onClick={randomWord}
-              disabled={isSearching}
-              aria-label="隨機產生單字"
-              title="隨機產生單字"
-            >
-              <Shuffle size={18} />
-              <span>隨機</span>
             </button>
           </div>
           <div className="search-hint">
