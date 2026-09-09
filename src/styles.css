@@ -53,12 +53,13 @@ footer { border-top: 1px solid var(--line); display: flex; justify-content: spac
 .word-title-line .audio-button { color: var(--muted); }
 .word-title-line .audio-button:hover { color: var(--green); }
 .content-grid { align-items: stretch; }
-.library-section { min-height: 540px; min-width: 0; height: 100%; display: flex; flex-direction: column; overflow: hidden; }
+.library-section { min-width: 0; height: 760px; display: flex; flex-direction: column; overflow: hidden; }
 .library-section .word-list { flex: 1; min-height: 0; max-height: none; overflow-y: auto; }
-.word-row { grid-template-columns: 1.05fr 1fr 1.2fr 22px; }
+.word-row { grid-template-columns: 1.05fr 1fr 1.2fr 40px; }
 .row-arrow { display: block; }
 .word-part-of-speech { color: var(--muted); font-size: 12px; }
-.detail-title { position: relative; }
+.detail-section { height: 760px; min-height: 0; overflow: hidden; }
+.detail-title { position: relative; min-height: 113px; display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: 1fr 1fr; align-items: center; }
 .detail-title > div:first-child { padding-right: 110px; }
 .detail-title .large-level { position: absolute; top: 27px; right: 0; }
 .detail-title .part-of-speech { position: absolute; top: 61px; right: 0; margin: 0; text-align: right; }
@@ -69,4 +70,11 @@ footer { border-top: 1px solid var(--line); display: flex; justify-content: spac
 .detail-section::after { content: attr(data-generated-time); display: block; color: var(--muted); font: 10px 'DM Mono', monospace; margin-top: 22px; text-align: right; }
 .detail-title .large-level { top: 42px; transform: translateY(-50%); }
 .detail-title .part-of-speech { top: 86px; transform: translateY(-50%); }
+.word-level { color: var(--green); font: 10px 'DM Mono', monospace; text-align: right; }
+.word-level { border: 1px solid color-mix(in srgb, var(--green) 35%, transparent); padding: 4px 5px; width: fit-content; justify-self: end; }
+.detail-title > div:first-child { display: contents; }
+.detail-title .word-title-line { grid-column: 1; grid-row: 1; }
+.detail-title > p { grid-column: 1; grid-row: 2; }
+.detail-title > .large-level { grid-column: 2; justify-self: end; align-self: center; position: static; transform: none; }
+.detail-title > .part-of-speech { grid-column: 2; grid-row: 2; justify-self: end; align-self: center; position: static; transform: none; margin: 0; }
 .detail-topline > span { font-size: 18px; font-weight: 700; }
