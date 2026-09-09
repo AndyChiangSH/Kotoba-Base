@@ -13,6 +13,7 @@ import {
   Settings,
   Sparkles,
   Sun,
+  Shuffle,
   Volume2,
   X,
 } from "lucide-react";
@@ -354,30 +355,14 @@ function App() {
     recognition.start();
   };
 
-  const translate = async () => {
-    const cleanQuery = query.trim();
-    if (!cleanQuery) {
-      setNotice("先輸入一個日文單字或中文意思。");
-      return;
-    }
-    const localWord = words.find((word) =>
-      `${word.japanese}${word.reading}${word.meaning}`
-        .toLowerCase()
-        .includes(cleanQuery.toLowerCase()),
-    );
-    if (localWord) {
-      setSelected(localWord);
-      setNotice("已從你的單字庫找到");
-      return;
-    }
+  const requestGeminiWord = async (prompt: string) => {
     if (!settings.apiKey) {
-      setNotice("找不到單字。請先在設定中填入 Gemini API Key。");
+      setNotice("請先在設定中填入 Gemini API Key。");
       setIsSettingsOpen(true);
-      return;
+      return null;
     }
     setIsSearching(true);
     setNotice("正在向 Gemini 詢問單字資料…");
-    const prompt = `你是日文老師。請針對「${cleanQuery}」回傳 JSON，不要 markdown。請用 Gemini 判斷 JLPT 難度，只能是 N5、N4、N3、N2、N1。只有日文漢字需要 reading，假名與中文不需重複標注。請至少提供 3 句不同例句、3 個搭配詞（每個附中文意思）、3 個同義詞/反義詞/相似詞。格式：{"japanese":"","reading":"","meaning":"","level":"N5","partOfSpeech":"","examples":[{"japanese":"","reading":"","translation":""},{"japanese":"","reading":"","translation":""},{"japanese":"","reading":"","translation":""}],"collocations":[{"word":"","reading":"","meaning":""},{"word":"","reading":"","meaning":""},{"word":"","reading":"","meaning":""}],"related":[{"word":"","reading":"","note":""},{"word":"","reading":"","note":""},{"word":"","reading":"","note":""}]}`;
     try {
       const response = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/${modelIds[settings.model]}:generateContent?key=${settings.apiKey}`,
@@ -405,12 +390,45 @@ function App() {
           minute: "2-digit",
         }),
       };
-      setSelected(resultWithId);
-      setNotice("翻譯完成，可以儲存到單字庫");
+      return resultWithId;
     } catch {
       setNotice("Gemini 暫時無法回應，請檢查 API Key、模型或網路連線。");
+      return null;
     } finally {
       setIsSearching(false);
+    }
+  };
+
+  const translate = async () => {
+    const cleanQuery = query.trim();
+    if (!cleanQuery) {
+      setNotice("先輸入一個日文單字或中文意思。");
+      return;
+    }
+    const localWord = words.find((word) =>
+      `${word.japanese}${word.reading}${word.meaning}`
+        .toLowerCase()
+        .includes(cleanQuery.toLowerCase()),
+    );
+    if (localWord) {
+      setSelected(localWord);
+      setNotice("已從你的單字庫找到");
+      return;
+    }
+    const prompt = `你是日文老師。請針對「${cleanQuery}」回傳 JSON，不要 markdown。請用 Gemini 判斷 JLPT 難度，只能是 N5、N4、N3、N2、N1。只有日文漢字需要 reading，假名與中文不需重複標注。請至少提供 3 句不同例句、3 個搭配詞（每個附中文意思）、3 個同義詞/反義詞/相似詞。格式：{"japanese":"","reading":"","meaning":"","level":"N5","partOfSpeech":"","examples":[{"japanese":"","reading":"","translation":""},{"japanese":"","reading":"","translation":""},{"japanese":"","reading":"","translation":""}],"collocations":[{"word":"","reading":"","meaning":""},{"word":"","reading":"","meaning":""},{"word":"","reading":"","meaning":""}],"related":[{"word":"","reading":"","note":""},{"word":"","reading":"","note":""},{"word":"","reading":"","note":""}]}`;
+    const result = await requestGeminiWord(prompt);
+    if (result) {
+      setSelected(result);
+      setNotice("翻譯完成，可以儲存到單字庫");
+    }
+  };
+
+  const randomWord = async () => {
+    const prompt = `你是日文老師。請隨機選擇一個適合學習的日文單字，難度隨機設定為 N1、N2、N3、N4 或 N5，並回傳 JSON，不要 markdown。只有日文漢字需要 reading，假名與中文不需重複標注。請至少提供 3 句不同例句、3 個搭配詞（每個附中文意思）、3 個同義詞/反義詞/相似詞。格式：{"japanese":"","reading":"","meaning":"","level":"N5","partOfSpeech":"","examples":[{"japanese":"","reading":"","translation":""},{"japanese":"","reading":"","translation":""},{"japanese":"","reading":"","translation":""}],"collocations":[{"word":"","reading":"","meaning":""},{"word":"","reading":"","meaning":""},{"word":"","reading":"","meaning":""}],"related":[{"word":"","reading":"","note":""},{"word":"","reading":"","note":""},{"word":"","reading":"","note":""}]}`;
+    const result = await requestGeminiWord(prompt);
+    if (result) {
+      setSelected(result);
+      setNotice("隨機單字產生完成，可以儲存到單字庫");
     }
   };
 
@@ -439,7 +457,7 @@ function App() {
               <BookOpen size={18} />
             </span>
             <span>日文單字庫</span>
-            <span className="version-badge">v0.11</span>
+            <span className="version-badge">v0.12</span>
           </div>
           <button
             className="icon-button"
@@ -497,6 +515,16 @@ function App() {
                 <Sparkles size={18} />
               )}
               翻譯
+            </button>
+            <button
+              className="random-button"
+              onClick={randomWord}
+              disabled={isSearching}
+              aria-label="隨機產生單字"
+              title="隨機產生單字"
+            >
+              <Shuffle size={18} />
+              <span>隨機</span>
             </button>
           </div>
           <div className="search-hint">
