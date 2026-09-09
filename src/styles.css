@@ -52,3 +52,17 @@ footer { border-top: 1px solid var(--line); display: flex; justify-content: spac
 .word-title-line h2 { margin-bottom: 0; }
 .word-title-line .audio-button { color: var(--muted); }
 .word-title-line .audio-button:hover { color: var(--green); }
+.content-grid { align-items: stretch; }
+.library-section { min-height: 540px; display: flex; flex-direction: column; }
+.library-section .word-list { flex: 1; max-height: none; }
+.word-row { grid-template-columns: 1.3fr 1fr 22px; }
+.row-arrow { display: block; }
+.detail-title { position: relative; }
+.detail-title > div:first-child { padding-right: 110px; }
+.detail-title .large-level { position: absolute; top: 27px; right: 0; }
+.detail-title .part-of-speech { position: absolute; top: 61px; right: 0; margin: 0; text-align: right; }
+.detail-title h2 { font-size: 44px; font-weight: 700; }
+.title-meta { display: contents; }
+.related-item { display: grid; grid-template-columns: minmax(120px, 1fr) minmax(0, 1.4fr); align-items: center; }
+.generated-time { color: var(--muted); font: 10px 'DM Mono', monospace; margin-top: 22px; text-align: right; }
+.detail-section::after { content: attr(data-generated-time); display: block; color: var(--muted); font: 10px 'DM Mono', monospace; margin-top: 22px; text-align: right; }
