@@ -41,7 +41,7 @@ footer { border-top: 1px solid var(--line); display: flex; justify-content: spac
 @keyframes toast-in { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translate(-50%, 0); } }
 @keyframes toast-out { from { opacity: 1; transform: translate(-50%, 0); } to { opacity: 0; transform: translate(-50%, 10px); } }
 .page-tools { margin-bottom: 52px; }
-.paste-button { border: 0; background: transparent; color: var(--muted); display: inline-flex; align-items: center; gap: 5px; padding: 6px 8px; border-radius: 5px; font-size: 12px; white-space: nowrap; }
+.paste-button { border: 0; background: none; color: var(--muted); display: grid; place-items: center; padding: 5px; border-radius: 50%; }
 .paste-button:hover { color: var(--green); background: var(--mint); }
 .section-heading, .detail-topline { align-items: center; }
 .result-count { padding-top: 0; }
@@ -54,9 +54,10 @@ footer { border-top: 1px solid var(--line); display: flex; justify-content: spac
 .word-title-line .audio-button:hover { color: var(--green); }
 .content-grid { align-items: stretch; }
 .library-section { min-height: 540px; display: flex; flex-direction: column; }
-.library-section .word-list { flex: 1; max-height: none; }
-.word-row { grid-template-columns: 1.3fr 1fr 22px; }
+.library-section .word-list { flex: 1; min-height: 0; max-height: none; }
+.word-row { grid-template-columns: 1.05fr 1fr 1.2fr 22px; }
 .row-arrow { display: block; }
+.word-part-of-speech { color: var(--muted); font-size: 12px; }
 .detail-title { position: relative; }
 .detail-title > div:first-child { padding-right: 110px; }
 .detail-title .large-level { position: absolute; top: 27px; right: 0; }
@@ -66,3 +67,5 @@ footer { border-top: 1px solid var(--line); display: flex; justify-content: spac
 .related-item { display: grid; grid-template-columns: minmax(120px, 1fr) minmax(0, 1.4fr); align-items: center; }
 .generated-time { color: var(--muted); font: 10px 'DM Mono', monospace; margin-top: 22px; text-align: right; }
 .detail-section::after { content: attr(data-generated-time); display: block; color: var(--muted); font: 10px 'DM Mono', monospace; margin-top: 22px; text-align: right; }
+.detail-title .large-level { top: 27px; }
+.detail-title .part-of-speech { top: 61px; }
