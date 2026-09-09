@@ -75,6 +75,7 @@ button { cursor: pointer; }
 .word-japanese { font-family: "Noto Serif JP", serif; font-size: 20px; }
 .word-meaning, .word-part-of-speech { color: var(--muted); font-size: 12px; }
 .word-level, .large-level { color: var(--green); font: 10px "DM Mono", monospace; border: 1px solid color-mix(in srgb, var(--green) 35%, transparent); padding: 4px 5px; width: fit-content; }
+.large-level { font-size: 14px; padding: 6px 9px; }
 .word-level { justify-self: end; }
 .word-japanese rt, .detail-title rt, ruby rt { color: var(--orange); font: 10px "DM Sans", sans-serif; }
 .empty-state { text-align: center; padding: 70px 20px; color: var(--muted); }
@@ -92,7 +93,7 @@ button { cursor: pointer; }
 .word-title-line { display: flex; align-items: center; gap: 8px; }
 .word-title-line h2 { margin: 0; font-family: "Noto Serif JP", serif; font-size: 44px; font-weight: 700; }
 .audio-button { padding: 5px; }
-.part-of-speech { color: var(--green); font-size: 11px; }
+.part-of-speech { color: var(--green); font-size: 13px; }
 
 .detail-block { padding: 20px 0; border-bottom: 1px solid var(--line); }
 .block-label { color: var(--muted); font: 10px "DM Mono", monospace; letter-spacing: 0.08em; }
@@ -130,6 +131,7 @@ footer a { color: var(--ink); text-decoration: none; display: flex; align-items:
   .workspace { width: calc(100% - 40px); }
   .content-grid { display: flex; flex-direction: column; gap: 45px; padding-top: 45px; }
   .detail-section { order: -1; padding: 23px 20px; }
+  .detail-section { width: 100%; }
   .library-section { height: auto; max-height: none; }
   .word-list { max-height: 760px; }
   .search-row { gap: 8px; }

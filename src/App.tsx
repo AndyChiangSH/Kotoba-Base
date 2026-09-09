@@ -439,7 +439,7 @@ function App() {
               <BookOpen size={18} />
             </span>
             <span>日文單字庫</span>
-            <span className="version-badge">v0.10</span>
+            <span className="version-badge">v0.11</span>
           </div>
           <button
             className="icon-button"
