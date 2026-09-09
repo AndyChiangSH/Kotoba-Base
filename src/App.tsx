@@ -188,7 +188,7 @@ function App() {
   return (
     <div className="app-shell">
       <main className="workspace">
-        <div className="page-tools"><div className="brand"><span className="brand-mark"><BookOpen size={18} /></span><span>日文單字庫</span><span className="version-badge">v0.7</span></div><button className="icon-button" aria-label="開啟設定" onClick={() => setIsSettingsOpen(true)}><Settings size={19} /><span>設定</span></button></div>
+        <div className="page-tools"><div className="brand"><span className="brand-mark"><BookOpen size={18} /></span><span>日文單字庫</span><span className="version-badge">v0.8</span></div><button className="icon-button" aria-label="開啟設定" onClick={() => setIsSettingsOpen(true)}><Settings size={19} /><span>設定</span></button></div>
 
         <section className="search-panel">
           <div className="search-row"><div className="search-input-wrap"><Search size={20} /><input value={query} onChange={(event) => setQuery(event.target.value)} onKeyDown={(event) => event.key === 'Enter' && translate()} placeholder="輸入日文單字或中文意思…" />{query ? <button className="clear-button" aria-label="清空文字框" onClick={() => setQuery('')}><X size={17} /></button> : <button className="paste-button" aria-label="貼上剪貼簿內容" onClick={pasteQuery}><ClipboardPaste size={17} /></button>}<button className={`mic-button ${isListening ? 'listening' : ''}`} aria-label="日語語音輸入" onClick={listen}><Mic size={19} /></button></div><button className="translate-button" onClick={translate} disabled={isSearching}>{isSearching ? <LoaderCircle className="spin" size={18} /> : <Sparkles size={18} />}翻譯</button></div>

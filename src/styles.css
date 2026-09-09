@@ -78,3 +78,22 @@ footer { border-top: 1px solid var(--line); display: flex; justify-content: spac
 .detail-title > .large-level { grid-column: 2; justify-self: end; align-self: center; position: static; transform: none; }
 .detail-title > .part-of-speech { grid-column: 2; grid-row: 2; justify-self: end; align-self: center; position: static; transform: none; margin: 0; }
 .detail-topline > span { font-size: 18px; font-weight: 700; }
+
+/* v0.7: let the card define the row height and scroll only the library. */
+.content-grid { align-items: stretch; }
+.detail-section { height: auto; min-height: 0; overflow: visible; }
+.library-section { height: 100%; max-height: 100%; min-height: 0; }
+.library-section .word-list { min-height: 0; max-height: 100%; overflow-y: auto; }
+.detail-title { min-height: 113px; display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: 1fr 1fr; align-items: center; }
+.detail-title > div:first-child { display: contents; }
+.detail-title .word-title-line { grid-column: 1; grid-row: 1; align-self: center; }
+.detail-title > p { grid-column: 1; grid-row: 2; align-self: center; }
+.detail-title > .large-level { grid-column: 2; grid-row: 1; position: static; align-self: center; justify-self: end; transform: none; }
+.detail-title > .part-of-speech { grid-column: 2; grid-row: 2; position: static; align-self: center; justify-self: end; margin: 0; transform: none; }
+
+@media (max-width: 780px) {
+	.content-grid { display: flex; flex-direction: column; }
+	.detail-section { order: -1; }
+	.library-section { height: auto; max-height: none; }
+	.library-section .word-list { max-height: 760px; }
+}
