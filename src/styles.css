@@ -70,7 +70,11 @@ button { cursor: pointer; }
 .library-section { min-width: 0; height: var(--card-height, auto); max-height: var(--card-height, none); display: flex; flex-direction: column; overflow: hidden; }
 .section-heading, .detail-topline { display: flex; align-items: center; justify-content: space-between; }
 .section-heading h2 { font-size: 23px; letter-spacing: -0.03em; margin: 0; }
+.library-heading-actions { display: flex; align-items: center; gap: 10px; }
 .result-count { color: var(--muted); font: 11px "DM Mono", monospace; }
+.quiz-button, .quiz-navigation button, .quiz-next-button { border: 1px solid var(--line); background: transparent; color: var(--muted); border-radius: 5px; padding: 8px 10px; display: inline-flex; align-items: center; gap: 6px; font-size: 12px; }
+.quiz-button:hover, .quiz-navigation button:hover:not(:disabled) { border-color: var(--green); color: var(--green); }
+.quiz-button:disabled, .quiz-navigation button:disabled { opacity: 0.45; cursor: not-allowed; }
 .word-list { margin-top: 25px; border-top: 1px solid var(--line); min-height: 0; max-height: calc(var(--card-height, 760px) - 82px); overflow-y: auto; scrollbar-color: var(--line) transparent; }
 .word-row { width: 100%; min-height: 76px; border: 0; border-bottom: 1px solid var(--line); background: transparent; display: grid; grid-template-columns: 1.05fr 1fr 1.2fr 40px; align-items: center; text-align: left; gap: 10px; padding: 0 10px; transition: background 0.2s ease, padding 0.2s ease; }
 .word-row:hover, .word-row.active { background: var(--surface); padding-left: 15px; }
@@ -133,6 +137,28 @@ button { cursor: pointer; }
 .chat-form input:focus { border-color: var(--green); }
 .chat-form button { width: 40px; border: 0; border-radius: 5px; background: var(--ink); color: var(--bg); display: grid; place-items: center; }
 .chat-form button:disabled { opacity: 0.45; cursor: not-allowed; }
+.quiz-backdrop { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 20px; background: rgba(20, 29, 24, 0.42); }
+.quiz-window { width: min(560px, 100%); background: var(--surface); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 24px 100px rgba(0, 0, 0, 0.2); overflow: hidden; }
+.quiz-header { display: flex; align-items: start; justify-content: space-between; padding: 22px 24px 17px; border-bottom: 1px solid var(--line); }
+.quiz-header h2 { margin: 3px 0 0; font-size: 25px; }
+.quiz-eyebrow { color: var(--orange); font: 500 10px "DM Mono", monospace; letter-spacing: 0.1em; }
+.quiz-body { padding: 24px; }
+.quiz-progress { display: flex; justify-content: space-between; color: var(--muted); font: 11px "DM Mono", monospace; }
+.quiz-word { margin: 45px 0 12px; text-align: center; font-family: "Noto Serif JP", serif; font-size: 42px; font-weight: 700; }
+.quiz-word rt { color: var(--orange); font: 11px "DM Sans", sans-serif; }
+.quiz-prompt { margin: 0 0 16px; color: var(--muted); text-align: center; font-size: 12px; }
+.quiz-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.quiz-option { min-height: 52px; border: 1px solid var(--line); background: transparent; border-radius: 6px; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; text-align: left; font-size: 13px; }
+.quiz-option:hover:not(:disabled) { border-color: var(--green); }
+.quiz-option.correct { border-color: var(--green); background: var(--mint); color: var(--green); }
+.quiz-option.incorrect { border-color: #d66b62; background: #f8dedb; color: #a33f38; }
+.quiz-option.revealed { opacity: 0.55; }
+.quiz-navigation { display: flex; justify-content: space-between; margin-top: 24px; }
+.quiz-next-button { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+.quiz-next-button:hover { opacity: 0.85; }
+.quiz-result { padding: 80px 24px; text-align: center; }
+.quiz-result strong { font: 500 48px "DM Mono", monospace; color: var(--green); }
+.quiz-result p { color: var(--muted); margin: 12px 0 22px; }
 .markdown-text { display: block; }
 .markdown-text code { padding: 1px 4px; border-radius: 3px; background: var(--bg); font: 0.9em "DM Mono", monospace; }
 .markdown-heading { display: inline-block; font-weight: 700; margin-bottom: 3px; }
@@ -186,4 +212,8 @@ footer a { color: var(--ink); text-decoration: none; display: flex; align-items:
   .word-title-line h2 { font-size: 33px; }
   .related-item { gap: 8px; }
   .detail-actions { gap: 5px; }
+  .library-heading-actions { gap: 6px; }
+  .quiz-button { padding: 7px 8px; }
+  .quiz-options { grid-template-columns: 1fr; }
+  .quiz-body { padding: 20px; }
 }

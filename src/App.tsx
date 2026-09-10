@@ -35,6 +35,12 @@ type Word = {
 
 type SettingsState = { apiKey: string; model: string; theme: "light" | "dark" };
 type ChatMessage = { role: "user" | "model"; text: string };
+type QuizQuestion = {
+  word: Word;
+  options: string[];
+  correctAnswer: string;
+  selectedAnswer?: string;
+};
 
 const starterWords: Word[] = [
   {
@@ -234,6 +240,10 @@ function RubyText({ text, reading }: { text: string; reading: string }) {
   );
 }
 
+function shuffle<T>(items: T[]) {
+  return [...items].sort(() => Math.random() - 0.5);
+}
+
 function MarkdownText({ text }: { text: string }) {
   const renderInline = (line: string) =>
     line.split(/(`[^`]+`|\*\*[^*]+\*\*|__[^_]+__|\*[^*]+\*|_[^_]+_)/g).map((part, index) => {
@@ -330,6 +340,10 @@ function App() {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [suggestedQuestions, setSuggestedQuestions] = useState<string[]>([]);
   const [isChatLoading, setIsChatLoading] = useState(false);
+  const [isQuizOpen, setIsQuizOpen] = useState(false);
+  const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([]);
+  const [quizIndex, setQuizIndex] = useState(0);
+  const [quizScore, setQuizScore] = useState(0);
 
   useEffect(() => {
     localStorage.setItem("kotoba-words", JSON.stringify(words));
@@ -574,6 +588,33 @@ function App() {
     setNotice("已儲存單字");
   };
 
+  const startQuiz = () => {
+    const questionWords = shuffle(words);
+    const fallbackMeanings = starterWords.map((word) => word.meaning);
+    const questions = questionWords.map((word) => {
+      const distractors = shuffle(
+        [...words, ...starterWords].filter((candidate) => candidate.japanese !== word.japanese),
+      ).map((candidate) => candidate.meaning).filter((meaning, index, all) => all.indexOf(meaning) === index);
+      const options = shuffle([word.meaning, ...distractors, ...fallbackMeanings.filter((meaning) => meaning !== word.meaning)])
+        .filter((meaning, index, all) => all.indexOf(meaning) === index)
+        .slice(0, 4);
+      return { word, options, correctAnswer: word.meaning };
+    });
+    setQuizQuestions(questions);
+    setQuizIndex(0);
+    setQuizScore(0);
+    setIsQuizOpen(true);
+  };
+
+  const answerQuiz = (answer: string) => {
+    setQuizQuestions((current) => current.map((question, index) => index === quizIndex && !question.selectedAnswer ? { ...question, selectedAnswer: answer } : question));
+    if (quizQuestions[quizIndex]?.selectedAnswer || answer !== quizQuestions[quizIndex]?.correctAnswer) return;
+    setQuizScore((score) => score + 1);
+  };
+
+  const currentQuiz = quizQuestions[quizIndex];
+  const quizFinished = quizQuestions.length > 0 && quizIndex >= quizQuestions.length;
+
   return (
     <div className="app-shell">
       <main className="workspace">
@@ -583,7 +624,7 @@ function App() {
               <BookOpen size={18} />
             </span>
             <span>日文單字庫</span>
-            <span className="version-badge">v0.16</span>
+            <span className="version-badge">v0.17</span>
           </div>
           <button
             className="icon-button"
@@ -676,9 +717,12 @@ function App() {
               <div>
                 <h2>我的單字庫</h2>
               </div>
-              <span className="result-count">
-                {filteredWords.length} 個單字
-              </span>
+              <div className="library-heading-actions">
+                <span className="result-count">{filteredWords.length} 個單字</span>
+                <button className="quiz-button" onClick={startQuiz} disabled={!words.length}>
+                  <Check size={16} /> 測驗
+                </button>
+              </div>
             </div>
             <div className="word-list">
               {filteredWords.map((word) => (
@@ -825,6 +869,28 @@ function App() {
           GitHub <ExternalLink size={13} />
         </a>
       </footer>
+
+      {isQuizOpen && (
+        <div className="quiz-backdrop" onMouseDown={(event) => event.target === event.currentTarget && setIsQuizOpen(false)}>
+          <section className="quiz-window" role="dialog" aria-modal="true" aria-label="單字測驗">
+            <div className="quiz-header">
+              <div><span className="quiz-eyebrow">WORD QUIZ</span><h2>單字測驗</h2></div>
+              <button className="close-button" onClick={() => setIsQuizOpen(false)} aria-label="關閉測驗"><X size={19} /></button>
+            </div>
+            {quizFinished ? (
+              <div className="quiz-result"><strong>{quizScore} / {quizQuestions.length}</strong><p>測驗完成！</p><button className="quiz-next-button" onClick={startQuiz}>再測一次</button></div>
+            ) : currentQuiz ? (
+              <div className="quiz-body">
+                <div className="quiz-progress">第 {quizIndex + 1} / {quizQuestions.length} 題 <span>答對 {quizScore} 題</span></div>
+                <div className="quiz-word"><RubyText text={currentQuiz.word.japanese} reading={currentQuiz.word.reading} /></div>
+                <p className="quiz-prompt">請選擇正確的中文意思</p>
+                <div className="quiz-options">{currentQuiz.options.map((option) => { const isSelected = currentQuiz.selectedAnswer === option; const isCorrect = option === currentQuiz.correctAnswer; return <button key={option} className={`quiz-option ${currentQuiz.selectedAnswer ? isCorrect ? "correct" : isSelected ? "incorrect" : "revealed" : ""}`} onClick={() => answerQuiz(option)} disabled={Boolean(currentQuiz.selectedAnswer)}>{option}{currentQuiz.selectedAnswer && isCorrect && <Check size={16} />}</button>; })}</div>
+                <div className="quiz-navigation"><button onClick={() => setQuizIndex((index) => Math.max(0, index - 1))} disabled={quizIndex === 0}>上一題</button><button className="quiz-next-button" onClick={() => setQuizIndex((index) => index + 1)} disabled={!currentQuiz.selectedAnswer}>{quizIndex === quizQuestions.length - 1 ? "查看結果" : "下一題"}</button></div>
+              </div>
+            ) : null}
+          </section>
+        </div>
+      )}
 
       {isChatOpen && selected && (
         <div className="chat-backdrop" onMouseDown={(event) => event.target === event.currentTarget && setIsChatOpen(false)}>
