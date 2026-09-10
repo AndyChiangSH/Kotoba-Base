@@ -595,9 +595,10 @@ function App() {
       const distractors = shuffle(
         [...words, ...starterWords].filter((candidate) => candidate.japanese !== word.japanese),
       ).map((candidate) => candidate.meaning).filter((meaning, index, all) => all.indexOf(meaning) === index);
-      const options = shuffle([word.meaning, ...distractors, ...fallbackMeanings.filter((meaning) => meaning !== word.meaning)])
+      const uniqueDistractors = [...distractors, ...fallbackMeanings.filter((meaning) => meaning !== word.meaning)]
         .filter((meaning, index, all) => all.indexOf(meaning) === index)
-        .slice(0, 4);
+        .slice(0, 3);
+      const options = shuffle([word.meaning, ...uniqueDistractors]);
       return { word, options, correctAnswer: word.meaning };
     });
     setQuizQuestions(questions);
@@ -624,7 +625,7 @@ function App() {
               <BookOpen size={18} />
             </span>
             <span>日文單字庫</span>
-            <span className="version-badge">v0.17</span>
+            <span className="version-badge">v0.18</span>
           </div>
           <button
             className="icon-button"
@@ -874,7 +875,7 @@ function App() {
         <div className="quiz-backdrop" onMouseDown={(event) => event.target === event.currentTarget && setIsQuizOpen(false)}>
           <section className="quiz-window" role="dialog" aria-modal="true" aria-label="單字測驗">
             <div className="quiz-header">
-              <div><span className="quiz-eyebrow">WORD QUIZ</span><h2>單字測驗</h2></div>
+              <div><h2>單字測驗</h2></div>
               <button className="close-button" onClick={() => setIsQuizOpen(false)} aria-label="關閉測驗"><X size={19} /></button>
             </div>
             {quizFinished ? (
@@ -884,7 +885,7 @@ function App() {
                 <div className="quiz-progress">第 {quizIndex + 1} / {quizQuestions.length} 題 <span>答對 {quizScore} 題</span></div>
                 <div className="quiz-word"><RubyText text={currentQuiz.word.japanese} reading={currentQuiz.word.reading} /></div>
                 <p className="quiz-prompt">請選擇正確的中文意思</p>
-                <div className="quiz-options">{currentQuiz.options.map((option) => { const isSelected = currentQuiz.selectedAnswer === option; const isCorrect = option === currentQuiz.correctAnswer; return <button key={option} className={`quiz-option ${currentQuiz.selectedAnswer ? isCorrect ? "correct" : isSelected ? "incorrect" : "revealed" : ""}`} onClick={() => answerQuiz(option)} disabled={Boolean(currentQuiz.selectedAnswer)}>{option}{currentQuiz.selectedAnswer && isCorrect && <Check size={16} />}</button>; })}</div>
+                <div className="quiz-options">{currentQuiz.options.map((option) => { const isSelected = currentQuiz.selectedAnswer === option; const isCorrect = option === currentQuiz.correctAnswer; return <button key={option} className={`quiz-option ${currentQuiz.selectedAnswer ? isCorrect ? "correct" : isSelected ? "incorrect" : "revealed" : ""}`} onClick={() => answerQuiz(option)} disabled={Boolean(currentQuiz.selectedAnswer)}>{option}</button>; })}</div>
                 <div className="quiz-navigation"><button onClick={() => setQuizIndex((index) => Math.max(0, index - 1))} disabled={quizIndex === 0}>上一題</button><button className="quiz-next-button" onClick={() => setQuizIndex((index) => index + 1)} disabled={!currentQuiz.selectedAnswer}>{quizIndex === quizQuestions.length - 1 ? "查看結果" : "下一題"}</button></div>
               </div>
             ) : null}
