@@ -1,5 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
-import type { ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   BookOpen,
   Bookmark,
@@ -237,100 +236,55 @@ function RubyText({ text, reading }: { text: string; reading: string }) {
 
 function MarkdownText({ text }: { text: string }) {
   const renderInline = (line: string) =>
-    line
-      .split(/(`[^`]+`|\*\*[^*]+\*\*|__[^_]+__|\*[^*]+\*|_[^_]+_)/g)
-      .map((part, index) => {
-        if (part.startsWith("`") && part.endsWith("`"))
-          return <code key={index}>{part.slice(1, -1)}</code>;
-        if (
-          (part.startsWith("**") && part.endsWith("**")) ||
-          (part.startsWith("__") && part.endsWith("__"))
-        )
-          return <strong key={index}>{part.slice(2, -2)}</strong>;
-        if (
-          (part.startsWith("*") && part.endsWith("*")) ||
-          (part.startsWith("_") && part.endsWith("_"))
-        )
-          return <em key={index}>{part.slice(1, -1)}</em>;
-        return <span key={index}>{part}</span>;
-      });
+    line.split(/(`[^`]+`|\*\*[^*]+\*\*|__[^_]+__|\*[^*]+\*|_[^_]+_)/g).map((part, index) => {
+      if (part.startsWith("`") && part.endsWith("`")) return <code key={index}>{part.slice(1, -1)}</code>;
+      if ((part.startsWith("**") && part.endsWith("**")) || (part.startsWith("__") && part.endsWith("__"))) return <strong key={index}>{part.slice(2, -2)}</strong>;
+      if ((part.startsWith("*") && part.endsWith("*")) || (part.startsWith("_") && part.endsWith("_"))) return <em key={index}>{part.slice(1, -1)}</em>;
+      return <span key={index}>{part}</span>;
+    });
 
+  const isTableSeparator = (line: string) =>
+    /^\s*\|?\s*:?-{3,}:?\s*(?:\|\s*:?-{3,}:?\s*)+\|?\s*$/.test(line);
+  const cells = (line: string) =>
+    line.trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map((cell) => cell.trim());
   const lines = text.split("\n");
-  const isTableSeparator = (line: string) => {
-    const cells = line.trim().replace(/^\|/, "").replace(/\|$/, "").split("|");
-    return (
-      cells.length >= 2 && cells.every((cell) => /^\s*:?-{3,}:?\s*$/.test(cell))
-    );
-  };
-  const cellsFrom = (line: string) =>
-    line
-      .trim()
-      .replace(/^\|/, "")
-      .replace(/\|$/, "")
-      .split("|")
-      .map((cell) => cell.trim());
   const blocks: ReactNode[] = [];
-  let index = 0;
 
-  while (index < lines.length) {
-    if (index + 1 < lines.length && isTableSeparator(lines[index + 1])) {
-      const headers = cellsFrom(lines[index]);
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index];
+    if (index + 1 < lines.length && line.includes("|") && isTableSeparator(lines[index + 1])) {
+      const header = cells(line);
       const rows: string[][] = [];
       index += 2;
-      while (index < lines.length && lines[index].includes("|")) {
-        rows.push(cellsFrom(lines[index]));
+      while (index < lines.length && lines[index].includes("|") && lines[index].trim()) {
+        rows.push(cells(lines[index]));
         index += 1;
       }
+      index -= 1;
       blocks.push(
         <table className="markdown-table" key={`table-${index}`}>
-          <thead>
-            <tr>
-              {headers.map((cell, cellIndex) => (
-                <th key={cellIndex}>{renderInline(cell)}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row, rowIndex) => (
-              <tr key={rowIndex}>
-                {headers.map((_, cellIndex) => (
-                  <td key={cellIndex}>{renderInline(row[cellIndex] || "")}</td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
+          <thead><tr>{header.map((cell, cellIndex) => <th key={cellIndex}>{renderInline(cell)}</th>)}</tr></thead>
+          <tbody>{rows.map((row, rowIndex) => <tr key={rowIndex}>{header.map((_, cellIndex) => <td key={cellIndex}>{renderInline(row[cellIndex] || "")}</td>)}</tr>)}</tbody>
         </table>,
       );
       continue;
     }
-
-    const line = lines[index];
-    if (/^\s*---+\s*$/.test(line))
-      blocks.push(<hr className="markdown-rule" key={`rule-${index}`} />);
-    else {
-      const content = line.replace(/^#{1,6}\s+/, "");
-      if (line.startsWith("- ") || line.startsWith("* "))
-        blocks.push(
-          <span className="markdown-list-item" key={index}>
-            • {renderInline(line.slice(2))}
-            <br />
-          </span>,
-        );
-      else
-        blocks.push(
-          <span
-            className={line !== content ? "markdown-heading" : ""}
-            key={index}
-          >
-            {renderInline(content)}
-            {index < lines.length - 1 && <br />}
-          </span>,
-        );
+    if (/^\s*---+\s*$/.test(line)) {
+      blocks.push(<hr key={`rule-${index}`} />);
+      continue;
     }
-    index += 1;
+    const content = line.replace(/^#{1,6}\s+/, "");
+    if (line.startsWith("- ") || line.startsWith("* ")) {
+      blocks.push(<span className="markdown-list-item" key={index}>• {renderInline(line.slice(2))}</span>);
+    } else {
+      blocks.push(<span className={line !== content ? "markdown-heading" : ""} key={index}>{renderInline(content)}</span>);
+    }
+    if (index < lines.length - 1) blocks.push(<br key={`break-${index}`} />);
   }
 
-  return <span className="markdown-text">{blocks}</span>;
+  return (
+    <span className="markdown-text">{blocks}</span>
+  );
 }
 
 function App() {
@@ -506,9 +460,7 @@ function App() {
     }
   };
 
-  const requestGeminiChat = async (
-    contents: { role: "user" | "model"; text: string }[],
-  ) => {
+  const requestGeminiChat = async (contents: { role: "user" | "model"; text: string }[]) => {
     if (!settings.apiKey || !selected) return null;
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${modelIds[settings.model]}:generateContent?key=${settings.apiKey}`,
@@ -516,17 +468,8 @@ function App() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          systemInstruction: {
-            parts: [
-              {
-                text: `你是日文學習助教，請只回答關於「${selected.japanese}（${selected.reading}）」這個單字的問題，回答使用繁體中文，必要時補充日文例子。`,
-              },
-            ],
-          },
-          contents: contents.map((message) => ({
-            role: message.role,
-            parts: [{ text: message.text }],
-          })),
+          systemInstruction: { parts: [{ text: `你是日文學習助教，請只回答關於「${selected.japanese}（${selected.reading}）」這個單字的問題，回答使用繁體中文，必要時補充日文例子。` }] },
+          contents: contents.map((message) => ({ role: message.role, parts: [{ text: message.text }] })),
         }),
       },
     );
@@ -539,44 +482,20 @@ function App() {
     if (!selected) return;
     setIsChatOpen(true);
     setChatInput("");
-    setChatMessages([
-      {
-        role: "model",
-        text: `關於 ${selected.japanese} 這個單字，有什麼想要深入探討的嗎？請在下方對話框輸入你的問題，或點擊三個推薦的問題~`,
-      },
-    ]);
+    setChatMessages([{ role: "model", text: `關於 ${selected.japanese} 這個單字，有什麼想要深入探討的嗎？請在下方對話框輸入你的問題，或點擊三個推薦的問題~` }]);
     setSuggestedQuestions([]);
     if (!settings.apiKey) {
-      setSuggestedQuestions([
-        "這個單字怎麼使用？",
-        "可以比較相似詞嗎？",
-        "請提供更多例句",
-      ]);
+      setSuggestedQuestions(["這個單字怎麼使用？", "可以比較相似詞嗎？", "請提供更多例句"]);
       setNotice("請先在設定中填入 Gemini API Key，才能使用深入探討。");
       setIsSettingsOpen(true);
       return;
     }
     setIsChatLoading(true);
     try {
-      const suggestions = await requestGeminiChat([
-        {
-          role: "user",
-          text: "請只回傳三個適合深入探討這個單字的繁體中文問題，每行一個，不要編號或其他說明。",
-        },
-      ]);
-      setSuggestedQuestions(
-        (suggestions || "")
-          .split("\n")
-          .map((item: string) => item.replace(/^[-*\d.、）)]+\s*/, "").trim())
-          .filter(Boolean)
-          .slice(0, 3),
-      );
+      const suggestions = await requestGeminiChat([{ role: "user", text: "請只回傳三個適合深入探討這個單字的繁體中文問題，每行一個，不要編號或其他說明。" }]);
+      setSuggestedQuestions((suggestions || "").split("\n").map((item: string) => item.replace(/^[-*\d.、）)]+\s*/, "").trim()).filter(Boolean).slice(0, 3));
     } catch {
-      setSuggestedQuestions([
-        "這個單字怎麼使用？",
-        "可以比較相似詞嗎？",
-        "請提供更多例句",
-      ]);
+      setSuggestedQuestions(["這個單字怎麼使用？", "可以比較相似詞嗎？", "請提供更多例句"]);
     } finally {
       setIsChatLoading(false);
     }
@@ -585,24 +504,15 @@ function App() {
   const sendChatMessage = async (text = chatInput) => {
     const question = text.trim();
     if (!question || !selected || isChatLoading) return;
-    const nextMessages = [
-      ...chatMessages,
-      { role: "user" as const, text: question },
-    ];
+    const nextMessages = [...chatMessages, { role: "user" as const, text: question }];
     setChatInput("");
     setChatMessages(nextMessages);
     setIsChatLoading(true);
     try {
       const answer = await requestGeminiChat(nextMessages);
-      setChatMessages([
-        ...nextMessages,
-        { role: "model", text: answer || "目前沒有收到回答，請再試一次。" },
-      ]);
+      setChatMessages([...nextMessages, { role: "model", text: answer || "目前沒有收到回答，請再試一次。" }]);
     } catch {
-      setChatMessages([
-        ...nextMessages,
-        { role: "model", text: "Gemini 暫時無法回應，請稍後再試。" },
-      ]);
+      setChatMessages([...nextMessages, { role: "model", text: "Gemini 暫時無法回應，請稍後再試。" }]);
     } finally {
       setIsChatLoading(false);
     }
@@ -633,9 +543,7 @@ function App() {
   };
 
   const randomWord = async () => {
-    const seenWords = new Set(
-      words.map((word) => `${word.japanese}:${word.reading}`),
-    );
+    const seenWords = new Set(words.map((word) => `${word.japanese}:${word.reading}`));
     if (selected) seenWords.add(`${selected.japanese}:${selected.reading}`);
     for (let attempt = 0; attempt < 5; attempt += 1) {
       const nonce = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -919,81 +827,23 @@ function App() {
       </footer>
 
       {isChatOpen && selected && (
-        <div
-          className="chat-backdrop"
-          onMouseDown={(event) =>
-            event.target === event.currentTarget && setIsChatOpen(false)
-          }
-        >
-          <section
-            className="chat-window"
-            role="dialog"
-            aria-modal="true"
-            aria-label="深入探討"
-          >
+        <div className="chat-backdrop" onMouseDown={(event) => event.target === event.currentTarget && setIsChatOpen(false)}>
+          <section className="chat-window" role="dialog" aria-modal="true" aria-label="深入探討">
             <div className="chat-header">
               <div>
                 <span className="chat-eyebrow">深入探討</span>
-                <h2>{selected.japanese}</h2>
+                <h2><RubyText text={selected.japanese} reading={selected.reading} /></h2>
               </div>
-              <button
-                className="close-button"
-                onClick={() => setIsChatOpen(false)}
-                aria-label="關閉聊天視窗"
-              >
-                <X size={19} />
-              </button>
+              <button className="close-button" onClick={() => setIsChatOpen(false)} aria-label="關閉聊天視窗"><X size={19} /></button>
             </div>
             <div className="chat-messages">
-              {chatMessages.map((message, index) => (
-                <div
-                  className={`chat-message ${message.role}`}
-                  key={`${message.role}-${index}`}
-                >
-                  <MarkdownText text={message.text} />
-                </div>
-              ))}
-              {isChatLoading && (
-                <div className="chat-message model">
-                  <span className="chat-loading">
-                    <LoaderCircle className="spin" size={15} />
-                    思考中…
-                  </span>
-                </div>
-              )}
+              {chatMessages.map((message, index) => <div className={`chat-message ${message.role}`} key={`${message.role}-${index}`}><MarkdownText text={message.text} /></div>)}
+              {isChatLoading && <div className="chat-message model"><span className="chat-loading"><LoaderCircle className="spin" size={15} />思考中…</span></div>}
             </div>
-            {suggestedQuestions.length > 0 && (
-              <div className="suggested-questions">
-                {suggestedQuestions.map((question) => (
-                  <button
-                    key={question}
-                    onClick={() => sendChatMessage(question)}
-                  >
-                    {question}
-                  </button>
-                ))}
-              </div>
-            )}
-            <form
-              className="chat-form"
-              onSubmit={(event) => {
-                event.preventDefault();
-                void sendChatMessage();
-              }}
-            >
-              <input
-                value={chatInput}
-                onChange={(event) => setChatInput(event.target.value)}
-                placeholder="輸入你想深入探討的問題…"
-                disabled={isChatLoading}
-              />
-              <button
-                type="submit"
-                aria-label="送出問題"
-                disabled={!chatInput.trim() || isChatLoading}
-              >
-                <Send size={17} />
-              </button>
+            {suggestedQuestions.length > 0 && <div className="suggested-questions">{suggestedQuestions.map((question) => <button key={question} onClick={() => sendChatMessage(question)}>{question}</button>)}</div>}
+            <form className="chat-form" onSubmit={(event) => { event.preventDefault(); void sendChatMessage(); }}>
+              <input value={chatInput} onChange={(event) => setChatInput(event.target.value)} placeholder="輸入你想深入探討的問題…" disabled={isChatLoading} />
+              <button type="submit" aria-label="送出問題" disabled={!chatInput.trim() || isChatLoading}><Send size={17} /></button>
             </form>
           </section>
         </div>
