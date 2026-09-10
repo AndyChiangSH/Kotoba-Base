@@ -735,7 +735,7 @@ function App() {
               <img src="/img/icon-2.png" alt="" />
             </span>
             <span>日文單字庫</span>
-            <span className="version-badge">v0.19</span>
+            <span className="version-badge">v1.0</span>
           </div>
           <button
             className="icon-button"
