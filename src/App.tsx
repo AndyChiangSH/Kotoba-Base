@@ -8,9 +8,11 @@ import {
   ExternalLink,
   LoaderCircle,
   Mic,
+  MessageCircle,
   Moon,
   Search,
   Settings,
+  Send,
   Sparkles,
   Sun,
   Shuffle,
@@ -32,6 +34,7 @@ type Word = {
 };
 
 type SettingsState = { apiKey: string; model: string; theme: "light" | "dark" };
+type ChatMessage = { role: "user" | "model"; text: string };
 
 const starterWords: Word[] = [
   {
@@ -269,6 +272,11 @@ function App() {
   const [notice, setNotice] = useState("");
   const [isNoticeLeaving, setIsNoticeLeaving] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatInput, setChatInput] = useState("");
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [suggestedQuestions, setSuggestedQuestions] = useState<string[]>([]);
+  const [isChatLoading, setIsChatLoading] = useState(false);
 
   useEffect(() => {
     localStorage.setItem("kotoba-words", JSON.stringify(words));
@@ -399,6 +407,64 @@ function App() {
     }
   };
 
+  const requestGeminiChat = async (contents: { role: "user" | "model"; text: string }[]) => {
+    if (!settings.apiKey || !selected) return null;
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${modelIds[settings.model]}:generateContent?key=${settings.apiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: `你是日文學習助教，請只回答關於「${selected.japanese}（${selected.reading}）」這個單字的問題，回答使用繁體中文，必要時補充日文例子。` }] },
+          contents: contents.map((message) => ({ role: message.role, parts: [{ text: message.text }] })),
+        }),
+      },
+    );
+    if (!response.ok) throw new Error("Chat request failed");
+    const data = await response.json();
+    return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
+  };
+
+  const openChat = async () => {
+    if (!selected) return;
+    setIsChatOpen(true);
+    setChatInput("");
+    setChatMessages([{ role: "model", text: `關於 ${selected.japanese} 這個單字，有什麼想要深入探討的嗎？請在下方對話框輸入你的問題~` }]);
+    setSuggestedQuestions([]);
+    if (!settings.apiKey) {
+      setSuggestedQuestions(["這個單字怎麼使用？", "可以比較相似詞嗎？", "請提供更多例句"]);
+      setNotice("請先在設定中填入 Gemini API Key，才能使用深入探討。");
+      setIsSettingsOpen(true);
+      return;
+    }
+    setIsChatLoading(true);
+    try {
+      const suggestions = await requestGeminiChat([{ role: "user", text: "請只回傳三個適合深入探討這個單字的繁體中文問題，每行一個，不要編號或其他說明。" }]);
+      setSuggestedQuestions((suggestions || "").split("\n").map((item: string) => item.replace(/^[-*\d.、）)]+\s*/, "").trim()).filter(Boolean).slice(0, 3));
+    } catch {
+      setSuggestedQuestions(["這個單字怎麼使用？", "可以比較相似詞嗎？", "請提供更多例句"]);
+    } finally {
+      setIsChatLoading(false);
+    }
+  };
+
+  const sendChatMessage = async (text = chatInput) => {
+    const question = text.trim();
+    if (!question || !selected || isChatLoading) return;
+    const nextMessages = [...chatMessages, { role: "user" as const, text: question }];
+    setChatInput("");
+    setChatMessages(nextMessages);
+    setIsChatLoading(true);
+    try {
+      const answer = await requestGeminiChat(nextMessages);
+      setChatMessages([...nextMessages, { role: "model", text: answer || "目前沒有收到回答，請再試一次。" }]);
+    } catch {
+      setChatMessages([...nextMessages, { role: "model", text: "Gemini 暫時無法回應，請稍後再試。" }]);
+    } finally {
+      setIsChatLoading(false);
+    }
+  };
+
   const translate = async () => {
     const cleanQuery = query.trim();
     if (!cleanQuery) {
@@ -464,7 +530,7 @@ function App() {
               <BookOpen size={18} />
             </span>
             <span>日文單字庫</span>
-            <span className="version-badge">v0.13</span>
+            <span className="version-badge">v0.14</span>
           </div>
           <button
             className="icon-button"
@@ -592,22 +658,28 @@ function App() {
             <section className="detail-section">
               <div className="detail-topline">
                 <span>單字卡</span>
-                <button
-                  className={`save-button ${words.some((word) => word.id === selected.id) ? "saved" : ""}`}
-                  onClick={saveWord}
-                >
-                  <Bookmark
-                    size={17}
-                    fill={
-                      words.some((word) => word.id === selected.id)
-                        ? "currentColor"
-                        : "none"
-                    }
-                  />
-                  {words.some((word) => word.id === selected.id)
-                    ? "已儲存單字"
-                    : "儲存單字"}
-                </button>
+                <div className="detail-actions">
+                  <button className="explore-button" onClick={openChat}>
+                    <MessageCircle size={17} />
+                    深入探討
+                  </button>
+                  <button
+                    className={`save-button ${words.some((word) => word.id === selected.id) ? "saved" : ""}`}
+                    onClick={saveWord}
+                  >
+                    <Bookmark
+                      size={17}
+                      fill={
+                        words.some((word) => word.id === selected.id)
+                          ? "currentColor"
+                          : "none"
+                      }
+                    />
+                    {words.some((word) => word.id === selected.id)
+                      ? "已儲存單字"
+                      : "儲存單字"}
+                  </button>
+                </div>
               </div>
               <div className="detail-title">
                 <div className="detail-japanese-group">
@@ -700,6 +772,29 @@ function App() {
           GitHub <ExternalLink size={13} />
         </a>
       </footer>
+
+      {isChatOpen && selected && (
+        <div className="chat-backdrop" onMouseDown={(event) => event.target === event.currentTarget && setIsChatOpen(false)}>
+          <section className="chat-window" role="dialog" aria-modal="true" aria-label="深入探討">
+            <div className="chat-header">
+              <div>
+                <span className="chat-eyebrow">深入探討</span>
+                <h2>{selected.japanese}</h2>
+              </div>
+              <button className="close-button" onClick={() => setIsChatOpen(false)} aria-label="關閉聊天視窗"><X size={19} /></button>
+            </div>
+            <div className="chat-messages">
+              {chatMessages.map((message, index) => <div className={`chat-message ${message.role}`} key={`${message.role}-${index}`}><span>{message.text}</span></div>)}
+              {isChatLoading && <div className="chat-message model"><span className="chat-loading"><LoaderCircle className="spin" size={15} />思考中…</span></div>}
+            </div>
+            {suggestedQuestions.length > 0 && <div className="suggested-questions">{suggestedQuestions.map((question) => <button key={question} onClick={() => sendChatMessage(question)}>{question}</button>)}</div>}
+            <form className="chat-form" onSubmit={(event) => { event.preventDefault(); void sendChatMessage(); }}>
+              <input value={chatInput} onChange={(event) => setChatInput(event.target.value)} placeholder="輸入你想深入探討的問題…" disabled={isChatLoading} />
+              <button type="submit" aria-label="送出問題" disabled={!chatInput.trim() || isChatLoading}><Send size={17} /></button>
+            </form>
+          </section>
+        </div>
+      )}
 
       {isSettingsOpen && (
         <div
