@@ -234,6 +234,26 @@ function RubyText({ text, reading }: { text: string; reading: string }) {
   );
 }
 
+function MarkdownText({ text }: { text: string }) {
+  const renderInline = (line: string) =>
+    line.split(/(`[^`]+`|\*\*[^*]+\*\*|__[^_]+__|\*[^*]+\*|_[^_]+_)/g).map((part, index) => {
+      if (part.startsWith("`") && part.endsWith("`")) return <code key={index}>{part.slice(1, -1)}</code>;
+      if ((part.startsWith("**") && part.endsWith("**")) || (part.startsWith("__") && part.endsWith("__"))) return <strong key={index}>{part.slice(2, -2)}</strong>;
+      if ((part.startsWith("*") && part.endsWith("*")) || (part.startsWith("_") && part.endsWith("_"))) return <em key={index}>{part.slice(1, -1)}</em>;
+      return <span key={index}>{part}</span>;
+    });
+
+  return (
+    <span className="markdown-text">
+      {text.split("\n").map((line, index) => {
+        const content = line.replace(/^#{1,6}\s+/, "");
+        if (line.startsWith("- ") || line.startsWith("* ")) return <span className="markdown-list-item" key={index}>• {renderInline(line.slice(2))}</span>;
+        return <span className={line !== content ? "markdown-heading" : ""} key={index}>{renderInline(content)}{index < text.split("\n").length - 1 && <br />}</span>;
+      })}
+    </span>
+  );
+}
+
 function App() {
   const [words, setWords] = useState<Word[]>(() => {
     const stored = JSON.parse(localStorage.getItem("kotoba-words") || "null");
@@ -429,7 +449,7 @@ function App() {
     if (!selected) return;
     setIsChatOpen(true);
     setChatInput("");
-    setChatMessages([{ role: "model", text: `關於 ${selected.japanese} 這個單字，有什麼想要深入探討的嗎？請在下方對話框輸入你的問題~` }]);
+    setChatMessages([{ role: "model", text: `關於 ${selected.japanese} 這個單字，有什麼想要深入探討的嗎？請在下方對話框輸入你的問題，或點擊三個推薦的問題~` }]);
     setSuggestedQuestions([]);
     if (!settings.apiKey) {
       setSuggestedQuestions(["這個單字怎麼使用？", "可以比較相似詞嗎？", "請提供更多例句"]);
@@ -530,7 +550,7 @@ function App() {
               <BookOpen size={18} />
             </span>
             <span>日文單字庫</span>
-            <span className="version-badge">v0.14</span>
+            <span className="version-badge">v0.15</span>
           </div>
           <button
             className="icon-button"
@@ -784,7 +804,7 @@ function App() {
               <button className="close-button" onClick={() => setIsChatOpen(false)} aria-label="關閉聊天視窗"><X size={19} /></button>
             </div>
             <div className="chat-messages">
-              {chatMessages.map((message, index) => <div className={`chat-message ${message.role}`} key={`${message.role}-${index}`}><span>{message.text}</span></div>)}
+              {chatMessages.map((message, index) => <div className={`chat-message ${message.role}`} key={`${message.role}-${index}`}><MarkdownText text={message.text} /></div>)}
               {isChatLoading && <div className="chat-message model"><span className="chat-loading"><LoaderCircle className="spin" size={15} />思考中…</span></div>}
             </div>
             {suggestedQuestions.length > 0 && <div className="suggested-questions">{suggestedQuestions.map((question) => <button key={question} onClick={() => sendChatMessage(question)}>{question}</button>)}</div>}
