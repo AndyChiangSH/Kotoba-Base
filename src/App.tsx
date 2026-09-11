@@ -18,6 +18,7 @@ import {
   Volume2,
   X,
 } from "lucide-react";
+import { Analytics } from "@vercel/analytics/react";
 
 type Word = {
   id: string;
@@ -1242,6 +1243,7 @@ function App() {
           </section>
         </div>
       )}
+      <Analytics />
     </div>
   );
 }
