@@ -19,6 +19,7 @@ import {
   X,
 } from "lucide-react";
 import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 type Word = {
   id: string;
@@ -1244,6 +1245,7 @@ function App() {
         </div>
       )}
       <Analytics />
+      <SpeedInsights />
     </div>
   );
 }
