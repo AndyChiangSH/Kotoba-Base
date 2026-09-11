@@ -4,7 +4,7 @@
 
 > 個人日文單字庫與學習工具。可以搜尋日文單字或中文意思，查看例句、搭配詞、相關詞與 JLPT 難度，也可以使用 Gemini 產生新單字資料。
 
-![logo-2.png](img/logo-2.png)
+![logo-2.png](public/logo-2.png)
 
 ## 功能
 
