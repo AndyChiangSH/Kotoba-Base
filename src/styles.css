@@ -995,13 +995,12 @@ footer a {
   .detail-section {
     order: -1;
     padding: 23px 20px;
-  }
-  .detail-section {
     width: 100%;
   }
   .library-section {
     height: auto;
     max-height: none;
+    width: 100%;
   }
   .word-list {
     max-height: 760px;
